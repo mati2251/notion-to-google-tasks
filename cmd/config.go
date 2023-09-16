@@ -16,12 +16,11 @@ var configCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		if viper.ConfigFileUsed() != "" {
-			err := checkOldConfigAndRemoveIt()
-			if err != nil {
-				os.Exit(1)
-			}
+			checkOldConfigAndRemoveIt()
 		}
-		setDefaults()
+		utils.GoogleConfig()
+		viper.SafeWriteConfig()
+		viper.WriteConfig()
 	},
 }
 
@@ -29,16 +28,7 @@ func init() {
 	rootCmd.AddCommand(configCmd)
 }
 
-func setDefaults() {
-	viper.SetDefault(utils.GOOGLE_AUTH_URI_KEY, "https://accounts.google.com/o/oauth2/auth")
-	viper.SetDefault(utils.GOOGLE_TOKEN_URI_KEY, "https://oauth2.googleapis.com/token")
-	viper.SetDefault(utils.GOOGLE_AUTH_PROVIDER_X509_CERT_URL_KEY, "https://www.googleapis.com/oauth2/v1/certs")
-	viper.SetDefault(utils.GOOGLE_REDIRECT_URIS_KEY, "http://localhost")
-	viper.WriteConfig()
-	viper.SafeWriteConfig()
-}
-
-func checkOldConfigAndRemoveIt() error {
+func checkOldConfigAndRemoveIt() {
 	prompt := promptui.Prompt{
 		Label:     "Do you want delete old config file?",
 		IsConfirm: true,
@@ -48,7 +38,7 @@ func checkOldConfigAndRemoveIt() error {
 
 	if err != nil {
 		fmt.Printf("Old config will be keep %v\n", err)
-		return err
+		os.Exit(0)
 	}
 
 	if result == "y" {
@@ -56,8 +46,7 @@ func checkOldConfigAndRemoveIt() error {
 		err := os.Remove(fileName)
 		if err != nil {
 			fmt.Printf("Error on remove old config file %v\n", err)
-			return err
+			os.Exit(1)
 		}
 	}
-	return nil
 }
