@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/manifoldco/promptui"
+	"github.com/mati2251/notion-to-google-tasks/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -29,10 +30,10 @@ func init() {
 }
 
 func setDefaults() {
-	viper.SetDefault("google.auth_uri", "https://accounts.google.com/o/oauth2/auth")
-	viper.SetDefault("google.token_uri", "https://oauth2.googleapis.com/token")
-	viper.SetDefault("google.auth_provider_x509_cert_url", "https://www.googleapis.com/oauth2/v1/certs")
-	viper.SetDefault("google.redirect_uris", "http://localhost")
+	viper.SetDefault(utils.GOOGLE_AUTH_URI_KEY, "https://accounts.google.com/o/oauth2/auth")
+	viper.SetDefault(utils.GOOGLE_TOKEN_URI_KEY, "https://oauth2.googleapis.com/token")
+	viper.SetDefault(utils.GOOGLE_AUTH_PROVIDER_X509_CERT_URL_KEY, "https://www.googleapis.com/oauth2/v1/certs")
+	viper.SetDefault(utils.GOOGLE_REDIRECT_URIS_KEY, "http://localhost")
 	viper.WriteConfig()
 	viper.SafeWriteConfig()
 }
