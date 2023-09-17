@@ -19,7 +19,7 @@ var configCmd = &cobra.Command{
 		if viper.ConfigFileUsed() != "" {
 			checkOldConfigAndRemoveIt()
 		}
-		services, _ := cmd.Flags().GetStringSlice("services")
+		services, _ := cmd.Flags().GetStringSlice("specific")
 		if slices.Contains(services, "google") {
 			utils.GoogleConfig()
 			fmt.Println("Google config done")

@@ -65,7 +65,7 @@ func getClientIdAndSecret() {
 	viper.Set(GOOGLE_CLIENT_SECRET_KEY, clientSecret)
 }
 
-func GetGoogleToken() *http.Client {
+func GetGoogleToken() (*http.Client, error) {
 	conf := &oauth2.Config{
 		ClientID:     viper.GetString(GOOGLE_CLIENT_ID_KEY),
 		ClientSecret: viper.GetString(GOOGLE_CLIENT_SECRET_KEY),
@@ -84,6 +84,7 @@ func GetGoogleToken() *http.Client {
 		tok, err = getTokenFromWeb(conf)
 		if err != nil {
 			log.Fatalf("Unable to get token from web: %v", err)
+			return nil, err
 		}
 	}
 
@@ -91,7 +92,7 @@ func GetGoogleToken() *http.Client {
 	viper.Set(GOOGLE_ACCESS_TOKEN_KEY, tok.AccessToken)
 	viper.Set(GOOGLE_TOKEN_TYPE_KEY, tok.TokenType)
 	viper.Set(GOOGLE_EXPIRY_KEY, tok.Expiry)
-	return conf.Client(context.Background(), tok)
+	return conf.Client(context.Background(), tok), nil
 }
 
 func getTokenFromConfig() (*oauth2.Token, error) {
@@ -112,8 +113,11 @@ func getTokenFromWeb(config *oauth2.Config) (*oauth2.Token, error) {
 	fmt.Printf("Go to the following link in your browser then type the "+
 		"authorization code: \n%v\n", authURL)
 
-	var authCode string
-	if _, err := fmt.Scan(&authCode); err != nil {
+	prompt := promptui.Prompt{
+		Label: "Authorization code",
+	}
+	authCode, err := prompt.Run()
+	if err != nil {
 		log.Fatalf("Unable to read authorization code: %v", err)
 		return nil, err
 	}
