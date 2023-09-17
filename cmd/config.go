@@ -8,6 +8,7 @@ import (
 	"github.com/mati2251/notion-to-google-tasks/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/exp/slices"
 )
 
 var configCmd = &cobra.Command{
@@ -18,13 +19,17 @@ var configCmd = &cobra.Command{
 		if viper.ConfigFileUsed() != "" {
 			checkOldConfigAndRemoveIt()
 		}
-		utils.GoogleConfig()
+		services, _ := cmd.Flags().GetStringSlice("services")
+		if slices.Contains(services, "google") {
+			utils.GoogleConfig()
+		}
 		viper.SafeWriteConfig()
 		viper.WriteConfig()
 	},
 }
 
 func init() {
+	configCmd.Flags().StringSliceP("services", "s", []string{"google"}, "Specific pages to sync")
 	rootCmd.AddCommand(configCmd)
 }
 
@@ -38,7 +43,6 @@ func checkOldConfigAndRemoveIt() {
 
 	if err != nil {
 		fmt.Printf("Old config will be keep %v\n", err)
-		os.Exit(0)
 	}
 
 	if result == "y" {
