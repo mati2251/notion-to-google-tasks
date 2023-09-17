@@ -22,6 +22,11 @@ var configCmd = &cobra.Command{
 		services, _ := cmd.Flags().GetStringSlice("services")
 		if slices.Contains(services, "google") {
 			utils.GoogleConfig()
+			fmt.Println("Google config done")
+		}
+		if slices.Contains(services, "notion") {
+			utils.NotionConfig()
+			fmt.Println("Notion config done")
 		}
 		viper.SafeWriteConfig()
 		viper.WriteConfig()
@@ -29,7 +34,7 @@ var configCmd = &cobra.Command{
 }
 
 func init() {
-	configCmd.Flags().StringSliceP("services", "s", []string{"google"}, "Specific pages to sync")
+	configCmd.Flags().StringSliceP("specific", "s", []string{"google", "notion", "pages-to-lists"}, "Specific pages to sync")
 	rootCmd.AddCommand(configCmd)
 }
 

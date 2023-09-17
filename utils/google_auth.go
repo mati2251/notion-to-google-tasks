@@ -28,7 +28,7 @@ const GOOGLE_EXPIRY_KEY = "google.expiry"
 func GoogleConfig() {
 	setDefaults()
 	getClientIdAndSecret()
-	GetToken()
+	GetGoogleToken()
 }
 
 func setDefaults() {
@@ -65,7 +65,7 @@ func getClientIdAndSecret() {
 	viper.Set(GOOGLE_CLIENT_SECRET_KEY, clientSecret)
 }
 
-func GetToken() *http.Client {
+func GetGoogleToken() *http.Client {
 	conf := &oauth2.Config{
 		ClientID:     viper.GetString(GOOGLE_CLIENT_ID_KEY),
 		ClientSecret: viper.GetString(GOOGLE_CLIENT_SECRET_KEY),
