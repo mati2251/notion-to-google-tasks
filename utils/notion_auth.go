@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/jomei/notionapi"
@@ -10,11 +11,11 @@ import (
 
 const NOTION_TOKEN_KEY = "notion.token"
 
-func NotionConfig() {
-	setToken()
+func NotionConfig() (*notionapi.Client, error) {
+	return setToken()
 }
 
-func setToken() {
+func setToken() (*notionapi.Client, error) {
 	fmt.Print("Enter your Notion token (to get this add new internal integrations from https://www.notion.so/my-integrations )")
 	prompt := promptui.Prompt{
 		Label: "Notion token",
@@ -22,12 +23,18 @@ func setToken() {
 	tok, err := prompt.Run()
 	if err != nil {
 		fmt.Printf("Prompt failed %v\n", err)
-		return
+		return nil, err
 	}
 	viper.Set(NOTION_TOKEN_KEY, tok)
+	tokenString := notionapi.Token(tok)
+	return notionapi.NewClient(tokenString), nil
 }
 
-func GetNotionToken() *notionapi.Client {
+func GetNotionToken() (*notionapi.Client, error) {
+	tokenString := viper.GetString(NOTION_TOKEN_KEY)
+	if tokenString != "" {
+		return nil, errors.New("notion token is null")
+	}
 	token := notionapi.Token(viper.GetString(NOTION_TOKEN_KEY))
-	return notionapi.NewClient(token)
+	return notionapi.NewClient(token), nil
 }

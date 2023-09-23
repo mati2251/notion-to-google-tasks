@@ -11,6 +11,9 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+var googleClient, _ = utils.GetGoogleToken()
+var notionClient, _ = utils.GetNotionToken()
+
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Configuration of the application",
@@ -21,12 +24,29 @@ var configCmd = &cobra.Command{
 		}
 		services, _ := cmd.Flags().GetStringSlice("specific")
 		if slices.Contains(services, "google") {
-			utils.GoogleConfig()
+			var err error
+			googleClient, err = utils.GoogleConfig()
+			if err != nil {
+				fmt.Printf("Something went wrong: %v\n", err)
+				os.Exit(1)
+			}
 			fmt.Println("Google config done")
 		}
 		if slices.Contains(services, "notion") {
-			utils.NotionConfig()
+			var err error
+			notionClient, err = utils.NotionConfig()
+			if err != nil {
+				fmt.Printf("Something went wrong: %v\n", err)
+				os.Exit(1)
+			}
 			fmt.Println("Notion config done")
+		}
+		if slices.Contains(services, "connections") {
+			if googleClient == nil || notionClient == nil {
+				fmt.Printf("Notion or google clients don't set")
+				os.Exit(1)
+			}
+			utils.ConfigConnections(googleClient, notionClient)
 		}
 		viper.SafeWriteConfig()
 		viper.WriteConfig()
@@ -34,7 +54,7 @@ var configCmd = &cobra.Command{
 }
 
 func init() {
-	configCmd.Flags().StringSliceP("specific", "s", []string{"google", "notion", "pages-to-lists"}, "Specific pages to sync")
+	configCmd.Flags().StringSliceP("specific", "s", []string{"google", "notion", "connections"}, "Specific pages to sync")
 	rootCmd.AddCommand(configCmd)
 }
 

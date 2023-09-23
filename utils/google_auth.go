@@ -25,10 +25,10 @@ const GOOGLE_ACCESS_TOKEN_KEY = "google.access_token"
 const GOOGLE_TOKEN_TYPE_KEY = "google.token_type"
 const GOOGLE_EXPIRY_KEY = "google.expiry"
 
-func GoogleConfig() {
+func GoogleConfig() (*http.Client, error) {
 	setDefaults()
 	getClientIdAndSecret()
-	GetGoogleToken()
+	return setGoogleToken()
 }
 
 func setDefaults() {
@@ -65,8 +65,8 @@ func getClientIdAndSecret() {
 	viper.Set(GOOGLE_CLIENT_SECRET_KEY, clientSecret)
 }
 
-func GetGoogleToken() (*http.Client, error) {
-	conf := &oauth2.Config{
+func getGoogleOauth2Conf() *oauth2.Config {
+	return &oauth2.Config{
 		ClientID:     viper.GetString(GOOGLE_CLIENT_ID_KEY),
 		ClientSecret: viper.GetString(GOOGLE_CLIENT_SECRET_KEY),
 		RedirectURL:  viper.GetString(GOOGLE_REDIRECT_URIS_KEY),
@@ -79,6 +79,10 @@ func GetGoogleToken() (*http.Client, error) {
 		},
 	}
 
+}
+
+func setGoogleToken() (*http.Client, error) {
+	conf := getGoogleOauth2Conf()
 	tok, err := getTokenFromConfig()
 	if err != nil {
 		tok, err = getTokenFromWeb(conf)
@@ -92,6 +96,17 @@ func GetGoogleToken() (*http.Client, error) {
 	viper.Set(GOOGLE_ACCESS_TOKEN_KEY, tok.AccessToken)
 	viper.Set(GOOGLE_TOKEN_TYPE_KEY, tok.TokenType)
 	viper.Set(GOOGLE_EXPIRY_KEY, tok.Expiry)
+	return conf.Client(context.Background(), tok), nil
+}
+
+func GetGoogleToken() (*http.Client, error) {
+	conf := getGoogleOauth2Conf()
+	tok, err := getTokenFromConfig()
+	if err != nil {
+		log.Fatalf("Unable to get token from web: %v", err)
+		return nil, err
+	}
+
 	return conf.Client(context.Background(), tok), nil
 }
 
