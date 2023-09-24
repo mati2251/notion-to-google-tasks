@@ -9,9 +9,8 @@ import (
 
 func ConfigConnections(googleClient *http.Client, notionClient *notionapi.Client) {
 	prompt := promptui.Prompt{
-		Label:     "Client ID",
+		Label:     "Share notion pages which you want synchronize",
 		AllowEdit: false,
 	}
-
 	prompt.Run()
 }

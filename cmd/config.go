@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/manifoldco/promptui"
@@ -11,24 +12,22 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-var googleClient, _ = utils.GetGoogleToken()
-var notionClient, _ = utils.GetNotionToken()
-
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Configuration of the application",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		if viper.ConfigFileUsed() != "" {
+		var googleClient, _ = utils.GetGoogleToken()
+		var notionClient, _ = utils.GetNotionToken()
+		services, _ := cmd.Flags().GetStringSlice("specific")
+		if viper.ConfigFileUsed() != "" && slices.Contains(services, "google") {
 			checkOldConfigAndRemoveIt()
 		}
-		services, _ := cmd.Flags().GetStringSlice("specific")
 		if slices.Contains(services, "google") {
 			var err error
 			googleClient, err = utils.GoogleConfig()
 			if err != nil {
-				fmt.Printf("Something went wrong: %v\n", err)
-				os.Exit(1)
+				log.Fatalf("Something went wrong: %v\n", err)
 			}
 			fmt.Println("Google config done")
 		}
@@ -36,15 +35,13 @@ var configCmd = &cobra.Command{
 			var err error
 			notionClient, err = utils.NotionConfig()
 			if err != nil {
-				fmt.Printf("Something went wrong: %v\n", err)
-				os.Exit(1)
+				log.Fatalf("Something went wrong: %v\n", err)
 			}
 			fmt.Println("Notion config done")
 		}
 		if slices.Contains(services, "connections") {
 			if googleClient == nil || notionClient == nil {
-				fmt.Printf("Notion or google clients don't set")
-				os.Exit(1)
+				log.Fatalf("Notion or google clients don't set")
 			}
 			utils.ConfigConnections(googleClient, notionClient)
 		}
@@ -54,13 +51,13 @@ var configCmd = &cobra.Command{
 }
 
 func init() {
-	configCmd.Flags().StringSliceP("specific", "s", []string{"google", "notion", "connections"}, "Specific pages to sync")
+	configCmd.Flags().StringSliceP("specific", "s", []string{"file-remove", "google", "notion", "connections"}, "Specific pages to sync")
 	rootCmd.AddCommand(configCmd)
 }
 
 func checkOldConfigAndRemoveIt() {
 	prompt := promptui.Prompt{
-		Label:     "Do you want delete old config file?",
+		Label:     "Do you want delete old config file",
 		IsConfirm: true,
 	}
 
@@ -74,8 +71,7 @@ func checkOldConfigAndRemoveIt() {
 		fileName := viper.ConfigFileUsed()
 		err := os.Remove(fileName)
 		if err != nil {
-			fmt.Printf("Error on remove old config file %v\n", err)
-			os.Exit(1)
+			log.Fatalf("Error on remove old config file %v\n", err)
 		}
 	}
 }

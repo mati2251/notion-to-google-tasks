@@ -25,6 +25,11 @@ const GOOGLE_ACCESS_TOKEN_KEY = "google.access_token"
 const GOOGLE_TOKEN_TYPE_KEY = "google.token_type"
 const GOOGLE_EXPIRY_KEY = "google.expiry"
 
+func SetViperDefaults(configFilePath string) {
+	viper.SetConfigFile(configFilePath)
+	viper.ReadInConfig()
+}
+
 func GoogleConfig() (*http.Client, error) {
 	setDefaults()
 	getClientIdAndSecret()
@@ -66,6 +71,7 @@ func getClientIdAndSecret() {
 }
 
 func getGoogleOauth2Conf() *oauth2.Config {
+	viper.ReadInConfig()
 	return &oauth2.Config{
 		ClientID:     viper.GetString(GOOGLE_CLIENT_ID_KEY),
 		ClientSecret: viper.GetString(GOOGLE_CLIENT_SECRET_KEY),
@@ -103,7 +109,6 @@ func GetGoogleToken() (*http.Client, error) {
 	conf := getGoogleOauth2Conf()
 	tok, err := getTokenFromConfig()
 	if err != nil {
-		log.Fatalf("Unable to get token from web: %v", err)
 		return nil, err
 	}
 

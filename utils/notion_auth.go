@@ -32,7 +32,7 @@ func setToken() (*notionapi.Client, error) {
 
 func GetNotionToken() (*notionapi.Client, error) {
 	tokenString := viper.GetString(NOTION_TOKEN_KEY)
-	if tokenString != "" {
+	if tokenString == "" {
 		return nil, errors.New("notion token is null")
 	}
 	token := notionapi.Token(viper.GetString(NOTION_TOKEN_KEY))
