@@ -5,12 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/viper"
 	"golang.org/x/oauth2"
+	"google.golang.org/api/option"
 	"google.golang.org/api/tasks/v1"
 )
 
@@ -30,7 +30,7 @@ func SetViperDefaults(configFilePath string) {
 	viper.ReadInConfig()
 }
 
-func GoogleConfig() (*http.Client, error) {
+func GoogleConfig() (*tasks.Service, error) {
 	setDefaults()
 	getClientIdAndSecret()
 	return setGoogleToken()
@@ -70,6 +70,33 @@ func getClientIdAndSecret() {
 	viper.Set(GOOGLE_CLIENT_SECRET_KEY, clientSecret)
 }
 
+func setGoogleToken() (*tasks.Service, error) {
+	conf := getGoogleOauth2Conf()
+	tok, err := getTokenFromConfig()
+	if err != nil {
+		tok, err = getTokenFromWeb(conf)
+		if err != nil {
+			log.Fatalf("Unable to get token from web: %v", err)
+			return nil, err
+		}
+	}
+
+	viper.Set(GOOGLE_REFRESH_TOKEN_KEY, tok.RefreshToken)
+	viper.Set(GOOGLE_ACCESS_TOKEN_KEY, tok.AccessToken)
+	viper.Set(GOOGLE_TOKEN_TYPE_KEY, tok.TokenType)
+	viper.Set(GOOGLE_EXPIRY_KEY, tok.Expiry)
+	return getServiceFromToken(conf, tok)
+}
+
+func GetTasksService() (*tasks.Service, error) {
+	conf := getGoogleOauth2Conf()
+	tok, err := getTokenFromConfig()
+	if err != nil {
+		return nil, err
+	}
+	return getServiceFromToken(conf, tok)
+}
+
 func getGoogleOauth2Conf() *oauth2.Config {
 	viper.ReadInConfig()
 	return &oauth2.Config{
@@ -87,32 +114,15 @@ func getGoogleOauth2Conf() *oauth2.Config {
 
 }
 
-func setGoogleToken() (*http.Client, error) {
-	conf := getGoogleOauth2Conf()
-	tok, err := getTokenFromConfig()
+func getServiceFromToken(conf *oauth2.Config, tok *oauth2.Token) (*tasks.Service, error) {
+	ctx := context.Background()
+	client := conf.Client(ctx, tok)
+	srv, err := tasks.NewService(ctx, option.WithHTTPClient(client))
 	if err != nil {
-		tok, err = getTokenFromWeb(conf)
-		if err != nil {
-			log.Fatalf("Unable to get token from web: %v", err)
-			return nil, err
-		}
-	}
-
-	viper.Set(GOOGLE_REFRESH_TOKEN_KEY, tok.RefreshToken)
-	viper.Set(GOOGLE_ACCESS_TOKEN_KEY, tok.AccessToken)
-	viper.Set(GOOGLE_TOKEN_TYPE_KEY, tok.TokenType)
-	viper.Set(GOOGLE_EXPIRY_KEY, tok.Expiry)
-	return conf.Client(context.Background(), tok), nil
-}
-
-func GetGoogleToken() (*http.Client, error) {
-	conf := getGoogleOauth2Conf()
-	tok, err := getTokenFromConfig()
-	if err != nil {
+		log.Fatalf("Unable to retrieve tasks Client %v", err)
 		return nil, err
 	}
-
-	return conf.Client(context.Background(), tok), nil
+	return srv, err
 }
 
 func getTokenFromConfig() (*oauth2.Token, error) {

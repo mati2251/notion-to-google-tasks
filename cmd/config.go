@@ -17,7 +17,7 @@ var configCmd = &cobra.Command{
 	Short: "Configuration of the application",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		var googleClient, _ = utils.GetGoogleToken()
+		var tasksService, _ = utils.GetTasksService()
 		var notionClient, _ = utils.GetNotionToken()
 		services, _ := cmd.Flags().GetStringSlice("specific")
 		if viper.ConfigFileUsed() != "" && slices.Contains(services, "google") {
@@ -25,7 +25,7 @@ var configCmd = &cobra.Command{
 		}
 		if slices.Contains(services, "google") {
 			var err error
-			googleClient, err = utils.GoogleConfig()
+			tasksService, err = utils.GoogleConfig()
 			if err != nil {
 				log.Fatalf("Something went wrong: %v\n", err)
 			}
@@ -40,10 +40,10 @@ var configCmd = &cobra.Command{
 			fmt.Println("Notion config done")
 		}
 		if slices.Contains(services, "connections") {
-			if googleClient == nil || notionClient == nil {
+			if tasksService == nil || notionClient == nil {
 				log.Fatalf("Notion or google clients don't set")
 			}
-			utils.ConfigConnections(googleClient, notionClient)
+			utils.ConfigConnections(tasksService, notionClient)
 		}
 		viper.SafeWriteConfig()
 		viper.WriteConfig()
