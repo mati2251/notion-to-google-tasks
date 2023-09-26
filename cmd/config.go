@@ -19,11 +19,26 @@ var configCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var tasksService, _ = utils.GetTasksService()
 		var notionClient, _ = utils.GetNotionToken()
-		services, _ := cmd.Flags().GetStringSlice("specific")
-		if viper.ConfigFileUsed() != "" && slices.Contains(services, "google") {
+		specifics, _ := cmd.Flags().GetStringSlice("specific")
+		removes, _ := cmd.Flags().GetStringSlice("remove")
+		if slices.Contains(removes, "all") && viper.ConfigFileUsed() != "" {
 			checkOldConfigAndRemoveIt()
+		} else {
+			if slices.Contains(removes, "google") {
+				utils.RemoveGoogleConfig()
+				fmt.Println("Google config removed")
+			}
+			if slices.Contains(removes, "notion") {
+				utils.RemoveNotionConfig()
+				fmt.Println("Notion config removed")
+			}
+			if slices.Contains(removes, "connections") {
+				utils.RemoveConnections()
+				fmt.Println("Connections config removed")
+			}
+			viper.WriteConfig()
 		}
-		if slices.Contains(services, "google") {
+		if slices.Contains(specifics, "google") {
 			var err error
 			tasksService, err = utils.GoogleConfig()
 			if err != nil {
@@ -31,7 +46,7 @@ var configCmd = &cobra.Command{
 			}
 			fmt.Println("Google config done")
 		}
-		if slices.Contains(services, "notion") {
+		if slices.Contains(specifics, "notion") {
 			var err error
 			notionClient, err = utils.NotionConfig()
 			if err != nil {
@@ -39,7 +54,7 @@ var configCmd = &cobra.Command{
 			}
 			fmt.Println("Notion config done")
 		}
-		if slices.Contains(services, "connections") {
+		if slices.Contains(specifics, "connections") {
 			if tasksService == nil || notionClient == nil {
 				log.Fatalf("Notion or google clients don't set")
 			}
@@ -49,7 +64,8 @@ var configCmd = &cobra.Command{
 }
 
 func init() {
-	configCmd.Flags().StringSliceP("specific", "s", []string{"file-remove", "google", "notion", "connections"}, "Specific pages to sync")
+	configCmd.Flags().StringSliceP("specific", "s", []string{"google", "notion", "connections"}, "Specific pages to sync (avaliable:google,notion,connections,none)")
+	configCmd.Flags().StringSliceP("remove", "r", []string{"all"}, "Remove old config specific part (avaliable:all,google,notion,connections)")
 	rootCmd.AddCommand(configCmd)
 }
 

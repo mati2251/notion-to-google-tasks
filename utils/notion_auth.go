@@ -40,3 +40,7 @@ func GetNotionToken() (*notionapi.Client, error) {
 	token := notionapi.Token(viper.GetString(NOTION_TOKEN_KEY))
 	return notionapi.NewClient(token), nil
 }
+
+func RemoveNotionConfig() {
+	viper.Set(NOTION_TOKEN_KEY, "")
+}

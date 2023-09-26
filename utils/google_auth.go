@@ -36,6 +36,17 @@ func GoogleConfig() (*tasks.Service, error) {
 	return setGoogleToken()
 }
 
+func RemoveGoogleConfig() {
+	viper.Set(GOOGLE_CLIENT_ID_KEY, "")
+	viper.Set(GOOGLE_CLIENT_SECRET_KEY, "")
+	viper.Set(GOOGLE_REFRESH_TOKEN_KEY, "")
+	viper.Set(GOOGLE_ACCESS_TOKEN_KEY, "")
+	viper.Set(GOOGLE_TOKEN_TYPE_KEY, "")
+	viper.Set(GOOGLE_EXPIRY_KEY, "")
+	setDefaults()
+	viper.WriteConfig()
+}
+
 func setDefaults() {
 	viper.SetDefault(GOOGLE_AUTH_URI_KEY, "https://accounts.google.com/o/oauth2/auth")
 	viper.SetDefault(GOOGLE_TOKEN_URI_KEY, "https://oauth2.googleapis.com/token")

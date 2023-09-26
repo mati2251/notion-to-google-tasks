@@ -88,6 +88,14 @@ func getTasksList(eventuallyNewName string) (*tasks.TaskList, error) {
 
 func addNewConnectionToConfig(databaseId string, listId string) {
 	viper.Set(fmt.Sprintf("connections.%s", databaseId), listId)
+	viper.WriteConfig()
+}
+
+func RemoveConnections() {
+	configFilePath := viper.ConfigFileUsed()
+	fmt.Printf("Please, remove connections manually from %s and type ENTER\n", configFilePath)
+	fmt.Scanln()
+	viper.ReadInConfig()
 }
 
 func createNewList(name string) (*tasks.TaskList, error) {
