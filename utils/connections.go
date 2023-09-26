@@ -35,7 +35,7 @@ func newConnections() {
 			break
 		}
 		bold.Printf("Select Google Tasks List to synchronize with %s database\n", database.Title[0].PlainText)
-		list, err := getTasksList()
+		list, err := getTasksList(database.Title[0].PlainText)
 		if err != nil {
 			log.Fatalf("Prompt failed %v\n", err)
 			return
@@ -64,7 +64,7 @@ func getNotionDb() (*notionapi.Database, error) {
 	return database, err
 }
 
-func getTasksList() (*tasks.TaskList, error) {
+func getTasksList(eventuallyNewName string) (*tasks.TaskList, error) {
 	lists, _ := tasksService.Tasklists.List().Do()
 	var taskListTitles []string
 	for _, list := range lists.Items {
@@ -81,7 +81,7 @@ func getTasksList() (*tasks.TaskList, error) {
 		return nil, err
 	}
 	if result == newListKey {
-		return createNewList()
+		return createNewList(eventuallyNewName)
 	}
 	return lists.Items[index], nil
 }
@@ -90,6 +90,9 @@ func addNewConnectionToConfig(databaseId string, listId string) {
 	viper.Set(fmt.Sprintf("connections.%s", databaseId), listId)
 }
 
-func createNewList() (*tasks.TaskList, error) {
-	panic("TODO")
+func createNewList(name string) (*tasks.TaskList, error) {
+	newList := &tasks.TaskList{
+		Title: name,
+	}
+	return tasksService.Tasklists.Insert(newList).Do()
 }

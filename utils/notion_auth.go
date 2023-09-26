@@ -26,6 +26,8 @@ func setToken() (*notionapi.Client, error) {
 		return nil, err
 	}
 	viper.Set(NOTION_TOKEN_KEY, tok)
+	viper.SafeWriteConfig()
+	viper.WriteConfig()
 	tokenString := notionapi.Token(tok)
 	return notionapi.NewClient(tokenString), nil
 }

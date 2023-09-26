@@ -72,19 +72,18 @@ func getClientIdAndSecret() {
 
 func setGoogleToken() (*tasks.Service, error) {
 	conf := getGoogleOauth2Conf()
-	tok, err := getTokenFromConfig()
+	tok, err := getTokenFromWeb(conf)
 	if err != nil {
-		tok, err = getTokenFromWeb(conf)
-		if err != nil {
-			log.Fatalf("Unable to get token from web: %v", err)
-			return nil, err
-		}
+		log.Fatalf("Unable to get token from web: %v", err)
+		return nil, err
 	}
 
 	viper.Set(GOOGLE_REFRESH_TOKEN_KEY, tok.RefreshToken)
 	viper.Set(GOOGLE_ACCESS_TOKEN_KEY, tok.AccessToken)
 	viper.Set(GOOGLE_TOKEN_TYPE_KEY, tok.TokenType)
 	viper.Set(GOOGLE_EXPIRY_KEY, tok.Expiry)
+	viper.SafeWriteConfig()
+	viper.WriteConfig()
 	return getServiceFromToken(conf, tok)
 }
 
@@ -104,7 +103,7 @@ func getGoogleOauth2Conf() *oauth2.Config {
 		ClientSecret: viper.GetString(GOOGLE_CLIENT_SECRET_KEY),
 		RedirectURL:  viper.GetString(GOOGLE_REDIRECT_URIS_KEY),
 		Scopes: []string{
-			tasks.TasksReadonlyScope,
+			tasks.TasksScope,
 		},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  viper.GetString(GOOGLE_AUTH_URI_KEY),

@@ -45,8 +45,6 @@ var configCmd = &cobra.Command{
 			}
 			utils.ConfigConnections(tasksService, notionClient)
 		}
-		viper.SafeWriteConfig()
-		viper.WriteConfig()
 	},
 }
 
