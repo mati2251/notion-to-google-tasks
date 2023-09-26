@@ -21,6 +21,7 @@ var configCmd = &cobra.Command{
 		var notionClient, _ = utils.GetNotionToken()
 		specifics, _ := cmd.Flags().GetStringSlice("specific")
 		removes, _ := cmd.Flags().GetStringSlice("remove")
+		utils.SetLastTimeSync()
 		if slices.Contains(removes, "all") && viper.ConfigFileUsed() != "" {
 			checkOldConfigAndRemoveIt()
 		} else {
