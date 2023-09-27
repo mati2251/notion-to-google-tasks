@@ -21,7 +21,6 @@ var configCmd = &cobra.Command{
 		var notionClient, _ = utils.GetNotionToken()
 		specifics, _ := cmd.Flags().GetStringSlice("specific")
 		removes, _ := cmd.Flags().GetStringSlice("remove")
-		utils.SetLastTimeSync()
 		if slices.Contains(removes, "all") && viper.ConfigFileUsed() != "" {
 			checkOldConfigAndRemoveIt()
 		} else {
@@ -61,11 +60,19 @@ var configCmd = &cobra.Command{
 			}
 			utils.ConfigConnections(tasksService, notionClient)
 		}
+		if slices.Contains(specifics, "first-scan") {
+			utils.ForceSync()
+		}
 	},
 }
 
 func init() {
-	configCmd.Flags().StringSliceP("specific", "s", []string{"google", "notion", "connections"}, "Specific pages to sync (avaliable:google,notion,connections,none)")
+	configCmd.Flags().StringSliceP(
+		"specific",
+		"s",
+		[]string{"google", "notion", "connections", "first-scan"},
+		"Specific pages to sync (avaliable:google,notion,connections,first-scan,none)",
+	)
 	configCmd.Flags().StringSliceP("remove", "r", []string{"all"}, "Remove old config specific part (avaliable:all,google,notion,connections)")
 	rootCmd.AddCommand(configCmd)
 }
