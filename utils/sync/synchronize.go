@@ -1,4 +1,4 @@
-package utils
+package sync
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jomei/notionapi"
+	utils_config "github.com/mati2251/notion-to-google-tasks/utils/config"
 	"github.com/spf13/viper"
 	"google.golang.org/api/tasks/v1"
 )
@@ -18,13 +19,16 @@ type connection struct {
 	tasksList      *tasks.TaskList
 }
 
+var notionClient *notionapi.Client
+var tasksService *tasks.Service
+
 func Init() {
 	var err error
-	notionClient, err = GetNotionToken()
+	notionClient, err = utils_config.GetNotionToken()
 	if err != nil {
 		log.Fatalf("Error getting notion client: %v", err)
 	}
-	tasksService, err = GetTasksService()
+	tasksService, err = utils_config.GetTasksService()
 	if err != nil {
 		log.Fatalf("Error getting google client: %v", err)
 	}
@@ -46,7 +50,7 @@ func ForceSync() {
 			}
 			tasksId := getStringValueFromProperty(item.Properties["Tasks ID"])
 			if tasksId == "" {
-				nameKey := viper.GetString(NOTION_NAME_KEY)
+				nameKey := viper.GetString(utils_config.NOTION_NAME_KEY)
 				if item.Properties[nameKey] == nil {
 					log.Fatalf("Invalid notion name key: %v", nameKey)
 				}

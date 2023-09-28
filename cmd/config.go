@@ -6,7 +6,8 @@ import (
 	"os"
 
 	"github.com/manifoldco/promptui"
-	"github.com/mati2251/notion-to-google-tasks/utils"
+	utils_config "github.com/mati2251/notion-to-google-tasks/utils/config"
+	"github.com/mati2251/notion-to-google-tasks/utils/sync"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
@@ -17,30 +18,30 @@ var configCmd = &cobra.Command{
 	Short: "Configuration of the application",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		var tasksService, _ = utils.GetTasksService()
-		var notionClient, _ = utils.GetNotionToken()
+		var tasksService, _ = utils_config.GetTasksService()
+		var notionClient, _ = utils_config.GetNotionToken()
 		specifics, _ := cmd.Flags().GetStringSlice("specific")
 		removes, _ := cmd.Flags().GetStringSlice("remove")
 		if slices.Contains(removes, "all") && viper.ConfigFileUsed() != "" {
 			checkOldConfigAndRemoveIt()
 		} else {
 			if slices.Contains(removes, "google") {
-				utils.RemoveGoogleConfig()
+				utils_config.RemoveGoogleConfig()
 				fmt.Println("Google config removed")
 			}
 			if slices.Contains(removes, "notion") {
-				utils.RemoveNotionConfig()
+				utils_config.RemoveNotionConfig()
 				fmt.Println("Notion config removed")
 			}
 			if slices.Contains(removes, "connections") {
-				utils.RemoveConnections()
+				utils_config.RemoveConnections()
 				fmt.Println("Connections config removed")
 			}
 			viper.WriteConfig()
 		}
 		if slices.Contains(specifics, "google") {
 			var err error
-			tasksService, err = utils.GoogleConfig()
+			tasksService, err = utils_config.GoogleConfig()
 			if err != nil {
 				log.Fatalf("Something went wrong: %v\n", err)
 			}
@@ -48,7 +49,7 @@ var configCmd = &cobra.Command{
 		}
 		if slices.Contains(specifics, "notion") {
 			var err error
-			notionClient, err = utils.NotionConfig()
+			notionClient, err = utils_config.NotionConfig()
 			if err != nil {
 				log.Fatalf("Something went wrong: %v\n", err)
 			}
@@ -58,10 +59,10 @@ var configCmd = &cobra.Command{
 			if tasksService == nil || notionClient == nil {
 				log.Fatalf("Notion or google clients don't set")
 			}
-			utils.ConfigConnections(tasksService, notionClient)
+			utils_config.ConfigConnections(tasksService, notionClient)
 		}
 		if slices.Contains(specifics, "first-scan") {
-			utils.ForceSync()
+			sync.ForceSync()
 		}
 	},
 }

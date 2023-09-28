@@ -16,7 +16,6 @@ var rootCmd = &cobra.Command{
 	Long: `Sync your selected sites from Notion to Google Tasks.
 Config your sync by subcommand config.
 Add entry to crontab by subcommand cron to run this command periodically.`,
-	// Run: func(cmd *cobra.Command, args []string) {},
 }
 
 func Execute() {
