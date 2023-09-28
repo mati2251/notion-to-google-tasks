@@ -8,22 +8,12 @@ import (
 	"os"
 
 	"github.com/manifoldco/promptui"
+	"github.com/mati2251/notion-to-google-tasks/utils/basic"
 	"github.com/spf13/viper"
 	"golang.org/x/oauth2"
 	"google.golang.org/api/option"
 	"google.golang.org/api/tasks/v1"
 )
-
-const GOOGLE_AUTH_URI_KEY = "google.auth_uri"
-const GOOGLE_TOKEN_URI_KEY = "google.token_uri"
-const GOOGLE_AUTH_PROVIDER_X509_CERT_URL_KEY = "google.auth_provider_x509_cert_url"
-const GOOGLE_REDIRECT_URIS_KEY = "google.redirect_uris"
-const GOOGLE_CLIENT_ID_KEY = "google.client_id"
-const GOOGLE_CLIENT_SECRET_KEY = "google.client_secret"
-const GOOGLE_REFRESH_TOKEN_KEY = "google.refresh_token"
-const GOOGLE_ACCESS_TOKEN_KEY = "google.access_token"
-const GOOGLE_TOKEN_TYPE_KEY = "google.token_type"
-const GOOGLE_EXPIRY_KEY = "google.expiry"
 
 func SetViperDefaults(configFilePath string) {
 	viper.SetConfigFile(configFilePath)
@@ -37,21 +27,21 @@ func GoogleConfig() (*tasks.Service, error) {
 }
 
 func RemoveGoogleConfig() {
-	viper.Set(GOOGLE_CLIENT_ID_KEY, "")
-	viper.Set(GOOGLE_CLIENT_SECRET_KEY, "")
-	viper.Set(GOOGLE_REFRESH_TOKEN_KEY, "")
-	viper.Set(GOOGLE_ACCESS_TOKEN_KEY, "")
-	viper.Set(GOOGLE_TOKEN_TYPE_KEY, "")
-	viper.Set(GOOGLE_EXPIRY_KEY, "")
+	viper.Set(basic.GOOGLE_CLIENT_ID_KEY, "")
+	viper.Set(basic.GOOGLE_CLIENT_SECRET_KEY, "")
+	viper.Set(basic.GOOGLE_REFRESH_TOKEN_KEY, "")
+	viper.Set(basic.GOOGLE_ACCESS_TOKEN_KEY, "")
+	viper.Set(basic.GOOGLE_TOKEN_TYPE_KEY, "")
+	viper.Set(basic.GOOGLE_EXPIRY_KEY, "")
 	setDefaults()
 	viper.WriteConfig()
 }
 
 func setDefaults() {
-	viper.SetDefault(GOOGLE_AUTH_URI_KEY, "https://accounts.google.com/o/oauth2/auth")
-	viper.SetDefault(GOOGLE_TOKEN_URI_KEY, "https://oauth2.googleapis.com/token")
-	viper.SetDefault(GOOGLE_AUTH_PROVIDER_X509_CERT_URL_KEY, "https://www.googleapis.com/oauth2/v1/certs")
-	viper.SetDefault(GOOGLE_REDIRECT_URIS_KEY, "http://localhost")
+	viper.SetDefault(basic.GOOGLE_AUTH_URI_KEY, "https://accounts.google.com/o/oauth2/auth")
+	viper.SetDefault(basic.GOOGLE_TOKEN_URI_KEY, "https://oauth2.googleapis.com/token")
+	viper.SetDefault(basic.GOOGLE_AUTH_PROVIDER_X509_CERT_URL_KEY, "https://www.googleapis.com/oauth2/v1/certs")
+	viper.SetDefault(basic.GOOGLE_REDIRECT_URIS_KEY, "http://localhost")
 }
 
 func getClientIdAndSecret() {
@@ -77,8 +67,8 @@ func getClientIdAndSecret() {
 		os.Exit(1)
 	}
 
-	viper.Set(GOOGLE_CLIENT_ID_KEY, clientId)
-	viper.Set(GOOGLE_CLIENT_SECRET_KEY, clientSecret)
+	viper.Set(basic.GOOGLE_CLIENT_ID_KEY, clientId)
+	viper.Set(basic.GOOGLE_CLIENT_SECRET_KEY, clientSecret)
 }
 
 func setGoogleToken() (*tasks.Service, error) {
@@ -89,10 +79,10 @@ func setGoogleToken() (*tasks.Service, error) {
 		return nil, err
 	}
 
-	viper.Set(GOOGLE_REFRESH_TOKEN_KEY, tok.RefreshToken)
-	viper.Set(GOOGLE_ACCESS_TOKEN_KEY, tok.AccessToken)
-	viper.Set(GOOGLE_TOKEN_TYPE_KEY, tok.TokenType)
-	viper.Set(GOOGLE_EXPIRY_KEY, tok.Expiry)
+	viper.Set(basic.GOOGLE_REFRESH_TOKEN_KEY, tok.RefreshToken)
+	viper.Set(basic.GOOGLE_ACCESS_TOKEN_KEY, tok.AccessToken)
+	viper.Set(basic.GOOGLE_TOKEN_TYPE_KEY, tok.TokenType)
+	viper.Set(basic.GOOGLE_EXPIRY_KEY, tok.Expiry)
 	viper.SafeWriteConfig()
 	viper.WriteConfig()
 	return getServiceFromToken(conf, tok)
@@ -110,15 +100,15 @@ func GetTasksService() (*tasks.Service, error) {
 func getGoogleOauth2Conf() *oauth2.Config {
 	viper.ReadInConfig()
 	return &oauth2.Config{
-		ClientID:     viper.GetString(GOOGLE_CLIENT_ID_KEY),
-		ClientSecret: viper.GetString(GOOGLE_CLIENT_SECRET_KEY),
-		RedirectURL:  viper.GetString(GOOGLE_REDIRECT_URIS_KEY),
+		ClientID:     viper.GetString(basic.GOOGLE_CLIENT_ID_KEY),
+		ClientSecret: viper.GetString(basic.GOOGLE_CLIENT_SECRET_KEY),
+		RedirectURL:  viper.GetString(basic.GOOGLE_REDIRECT_URIS_KEY),
 		Scopes: []string{
 			tasks.TasksScope,
 		},
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  viper.GetString(GOOGLE_AUTH_URI_KEY),
-			TokenURL: viper.GetString(GOOGLE_TOKEN_URI_KEY),
+			AuthURL:  viper.GetString(basic.GOOGLE_AUTH_URI_KEY),
+			TokenURL: viper.GetString(basic.GOOGLE_TOKEN_URI_KEY),
 		},
 	}
 
@@ -136,14 +126,14 @@ func getServiceFromToken(conf *oauth2.Config, tok *oauth2.Token) (*tasks.Service
 }
 
 func getTokenFromConfig() (*oauth2.Token, error) {
-	if viper.GetString(GOOGLE_REFRESH_TOKEN_KEY) == "" {
+	if viper.GetString(basic.GOOGLE_REFRESH_TOKEN_KEY) == "" {
 		return nil, errors.New("no refresh token found")
 	}
 	tok := &oauth2.Token{
-		RefreshToken: viper.GetString(GOOGLE_REFRESH_TOKEN_KEY),
-		AccessToken:  viper.GetString(GOOGLE_ACCESS_TOKEN_KEY),
-		TokenType:    viper.GetString(GOOGLE_TOKEN_TYPE_KEY),
-		Expiry:       viper.GetTime(GOOGLE_EXPIRY_KEY),
+		RefreshToken: viper.GetString(basic.GOOGLE_REFRESH_TOKEN_KEY),
+		AccessToken:  viper.GetString(basic.GOOGLE_ACCESS_TOKEN_KEY),
+		TokenType:    viper.GetString(basic.GOOGLE_TOKEN_TYPE_KEY),
+		Expiry:       viper.GetTime(basic.GOOGLE_EXPIRY_KEY),
 	}
 	return tok, nil
 }

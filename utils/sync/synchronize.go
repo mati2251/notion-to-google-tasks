@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jomei/notionapi"
+	"github.com/mati2251/notion-to-google-tasks/utils/basic"
 	utils_config "github.com/mati2251/notion-to-google-tasks/utils/config"
 	"github.com/spf13/viper"
 	"google.golang.org/api/tasks/v1"
@@ -50,7 +51,7 @@ func ForceSync() {
 			}
 			tasksId := getStringValueFromProperty(item.Properties["Tasks ID"])
 			if tasksId == "" {
-				nameKey := viper.GetString(utils_config.NOTION_NAME_KEY)
+				nameKey := viper.GetString(basic.NOTION_NAME_KEY)
 				if item.Properties[nameKey] == nil {
 					log.Fatalf("Invalid notion name key: %v", nameKey)
 				}
