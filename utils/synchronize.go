@@ -52,6 +52,7 @@ func ForceSync() {
 				}
 				name := getStringValueFromProperty(item.Properties[nameKey])
 				taskId := createNewTaskAtGoogle(name, connection)
+				insertTaskIdToNotion(taskId, item.ID)
 			} else {
 				// todo update tasks
 			}
@@ -63,6 +64,26 @@ func createDbPropTasksIdIfNotExists(databaseId notionapi.DatabaseID) {
 	result, _ := notionClient.Database.Query(context.Background(), databaseId, nil)
 	if result.Results[0].Properties["Tasks ID"] == nil {
 		createDbPropTasksId(databaseId)
+	}
+}
+
+func insertTaskIdToNotion(taskId string, notionId notionapi.ObjectID) {
+	_, err := notionClient.Page.Update(context.Background(), notionapi.PageID(notionId), &notionapi.PageUpdateRequest{
+		Properties: notionapi.Properties{
+			"Tasks ID": &notionapi.RichTextProperty{
+				RichText: []notionapi.RichText{
+					{
+						Type: "text",
+						Text: &notionapi.Text{
+							Content: taskId,
+						},
+					},
+				},
+			},
+		},
+	})
+	if err != nil {
+		log.Fatalf("Error updating page: %v", err)
 	}
 }
 
