@@ -2,6 +2,7 @@ package sync
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/jomei/notionapi"
@@ -48,16 +49,21 @@ func createNewTaskAtGoogle(tuple notionapi.Page, connection connections.Connecti
 	if tuple.Properties[nameKey] == nil {
 		log.Fatalf("Invalid notion name key: %v", nameKey)
 	}
-	name := getStringValueFromProperty(tuple.Properties[nameKey])
-	newTask := &tasks.Task{
-		Title: name,
+	// name := getStringValueFromProperty(tuple.Properties[nameKey])
+	for test, prop := range tuple.Properties {
+		fmt.Printf("test: %v\n", test)
+		fmt.Printf("prop: %v\n", prop)
 	}
-	task, err := tasksService.Tasks.Insert(connection.TasksList.Id, newTask).Do()
-	if err != nil {
-		log.Fatalf("Error creating task: %v", err)
-	}
-	insertTaskIdToNotion(task.Id, tuple.ID)
-	return task.Id
+	// newTask := &tasks.Task{
+	// Title: name,
+	// }
+	// task, err := tasksService.Tasks.Insert(connection.TasksList.Id, newTask).Do()
+	// if err != nil {
+	// log.Fatalf("Error creating task: %v", err)
+	// }
+	// insertTaskIdToNotion(task.Id, tuple.ID)
+	// return task.Id
+	return ""
 }
 
 func insertTaskIdToNotion(taskId string, notionId notionapi.ObjectID) {

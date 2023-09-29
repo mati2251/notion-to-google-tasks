@@ -88,5 +88,7 @@ func checkOldConfigAndRemoveIt() {
 		if err != nil {
 			log.Fatalf("Error on remove old config file %v\n", err)
 		}
+		viper.Reset()
+		viper.SetConfigFile(fileName)
 	}
 }
