@@ -1,4 +1,4 @@
-package basic
+package keys
 
 const GOOGLE_AUTH_URI_KEY = "google.auth_uri"
 const GOOGLE_TOKEN_URI_KEY = "google.token_uri"

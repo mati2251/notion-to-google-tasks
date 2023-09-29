@@ -7,33 +7,16 @@ import (
 	"time"
 
 	"github.com/jomei/notionapi"
-	"github.com/mati2251/notion-to-google-tasks/utils/basic"
-	utils_config "github.com/mati2251/notion-to-google-tasks/utils/config"
+	"github.com/mati2251/notion-to-google-tasks/utils/config/connections"
+	"github.com/mati2251/notion-to-google-tasks/utils/keys"
 	"github.com/spf13/viper"
 	"google.golang.org/api/tasks/v1"
 )
 
 const LAST_TIME_SYNC = "last_time_sync"
 
-type connection struct {
-	notionDatabase notionapi.DatabaseID
-	tasksList      *tasks.TaskList
-}
-
 var notionClient *notionapi.Client
 var tasksService *tasks.Service
-
-func Init() {
-	var err error
-	notionClient, err = utils_config.GetNotionToken()
-	if err != nil {
-		log.Fatalf("Error getting notion client: %v", err)
-	}
-	tasksService, err = utils_config.GetTasksService()
-	if err != nil {
-		log.Fatalf("Error getting google client: %v", err)
-	}
-}
 
 func Sync() {
 	// connections := getConnections()
@@ -42,16 +25,16 @@ func Sync() {
 }
 
 func ForceSync() {
-	connections := getConnections()
+	connections := connections.GetConnections()
 	for _, connection := range connections {
-		items, _ := notionClient.Database.Query(context.Background(), connection.notionDatabase, nil)
+		items, _ := notionClient.Database.Query(context.Background(), connection.NotionDatabase, nil)
 		for index, item := range items.Results {
 			if index == 0 {
-				createDbPropTasksIdIfNotExists(connection.notionDatabase)
+				createDbPropTasksIdIfNotExists(connection.NotionDatabase)
 			}
 			tasksId := getStringValueFromProperty(item.Properties["Tasks ID"])
 			if tasksId == "" {
-				nameKey := viper.GetString(basic.NOTION_NAME_KEY)
+				nameKey := viper.GetString(keys.NOTION_NAME_KEY)
 				if item.Properties[nameKey] == nil {
 					log.Fatalf("Invalid notion name key: %v", nameKey)
 				}
@@ -92,11 +75,11 @@ func insertTaskIdToNotion(taskId string, notionId notionapi.ObjectID) {
 	}
 }
 
-func createNewTaskAtGoogle(name string, connection connection) string {
+func createNewTaskAtGoogle(name string, connection connections.Connection) string {
 	newTask := &tasks.Task{
 		Title: name,
 	}
-	task, err := tasksService.Tasks.Insert(connection.tasksList.Id, newTask).Do()
+	task, err := tasksService.Tasks.Insert(connection.TasksList.Id, newTask).Do()
 	if err != nil {
 		log.Fatalf("Error creating task: %v", err)
 	}
@@ -223,26 +206,6 @@ func createDbPropTasksId(databaseId notionapi.DatabaseID) {
 	})
 	if err != nil {
 		log.Fatalf("Error updating database: %v", err)
-	}
-}
-
-func getConnections() []connection {
-	var connections []connection
-	for notionDatabaseId, tasksListId := range viper.GetStringMapString("connections") {
-		connections = append(connections, getConnectionFromIds(notionDatabaseId, tasksListId))
-	}
-	return connections
-}
-
-func getConnectionFromIds(notionDatabaseId string, tasksListId string) connection {
-	notionDatabaseIdObj := notionapi.DatabaseID(notionDatabaseId)
-	tasksList, err := tasksService.Tasklists.Get(tasksListId).Do()
-	if err != nil {
-		log.Fatalf("Error getting google tasklist: %v", err)
-	}
-	return connection{
-		notionDatabase: notionDatabaseIdObj,
-		tasksList:      tasksList,
 	}
 }
 

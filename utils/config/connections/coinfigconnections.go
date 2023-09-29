@@ -1,4 +1,4 @@
-package config
+package connections
 
 import (
 	"context"
@@ -8,17 +8,14 @@ import (
 	"github.com/fatih/color"
 	"github.com/jomei/notionapi"
 	"github.com/manifoldco/promptui"
+	"github.com/mati2251/notion-to-google-tasks/utils/config/auth"
 	"github.com/spf13/viper"
 	"google.golang.org/api/tasks/v1"
 )
 
-var notionClient *notionapi.Client = nil
-var tasksService *tasks.Service = nil
 var bold = color.New(color.Bold)
 
-func ConfigConnections(tasks *tasks.Service, notion *notionapi.Client) {
-	notionClient = notion
-	tasksService = tasks
+func ConfigConnections() {
 	bold.Println("Share notion pages which you want synchronize and type ENTER")
 	fmt.Scanln()
 	newConnections()
@@ -57,7 +54,7 @@ func getNotionDb() (*notionapi.Database, error) {
 	}
 
 	databaseId := notionapi.DatabaseID(databaseIdString)
-	database, err := notionClient.Database.Get(context.Background(), databaseId)
+	database, err := auth.NotionClient.Database.Get(context.Background(), databaseId)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +62,7 @@ func getNotionDb() (*notionapi.Database, error) {
 }
 
 func getTasksList(eventuallyNewName string) (*tasks.TaskList, error) {
-	lists, _ := tasksService.Tasklists.List().Do()
+	lists, _ := auth.TasksService.Tasklists.List().Do()
 	var taskListTitles []string
 	for _, list := range lists.Items {
 		taskListTitles = append(taskListTitles, list.Title)
@@ -102,5 +99,5 @@ func createNewList(name string) (*tasks.TaskList, error) {
 	newList := &tasks.TaskList{
 		Title: name,
 	}
-	return tasksService.Tasklists.Insert(newList).Do()
+	return auth.TasksService.Tasklists.Insert(newList).Do()
 }

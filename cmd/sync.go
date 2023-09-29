@@ -3,6 +3,7 @@ package cmd
 import (
 	"log"
 
+	"github.com/mati2251/notion-to-google-tasks/utils/config/auth"
 	"github.com/mati2251/notion-to-google-tasks/utils/sync"
 	"github.com/spf13/cobra"
 )
@@ -12,7 +13,7 @@ var syncCmd = &cobra.Command{
 	Short: "Synchronize notion databases with google tasks. Requiers valid config(see config command)",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		sync.Init()
+		auth.InitConnections()
 		isForce, err := cmd.Flags().GetBool("force")
 		if err != nil {
 			log.Fatalf("Error getting force flag: %v", err)
