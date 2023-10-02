@@ -12,7 +12,7 @@ import (
 )
 
 func NotionConfig() {
-	configNameAndDueTimeKeys()
+	configNameAndDeadlineKeys()
 	var err error
 	NotionClient, err = setToken()
 	if err != nil {
@@ -50,7 +50,7 @@ func setToken() (*notionapi.Client, error) {
 	return notionapi.NewClient(tokenString), nil
 }
 
-func configNameAndDueTimeKeys() {
+func configNameAndDeadlineKeys() {
 	prompt := promptui.Prompt{
 		Label: "Enter name key in notion database property",
 	}
@@ -60,11 +60,11 @@ func configNameAndDueTimeKeys() {
 	}
 	viper.Set(keys.NOTION_NAME_KEY, name)
 	prompt = promptui.Prompt{
-		Label: "Enter due time key in notion database property",
+		Label: "Enter deadline key in notion database property",
 	}
-	dueTime, err := prompt.Run()
+	deadline, err := prompt.Run()
 	if err != nil {
 		log.Fatalf("Prompt failed %v\n", err)
 	}
-	viper.Set(keys.NOTION_DUE_TIME_KEY, dueTime)
+	viper.Set(keys.NOTION_DEADLINE_KEY, deadline)
 }

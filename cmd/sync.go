@@ -13,7 +13,10 @@ var syncCmd = &cobra.Command{
 	Short: "Synchronize notion databases with google tasks. Requiers valid config(see config command)",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		auth.InitConnections()
+		err := auth.InitConnections()
+		if err != nil {
+			log.Fatalf("Error initializing connections: %v", err)
+		}
 		isForce, err := cmd.Flags().GetBool("force")
 		if err != nil {
 			log.Fatalf("Error getting force flag: %v", err)
