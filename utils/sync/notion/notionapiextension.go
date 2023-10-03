@@ -1,4 +1,4 @@
-package sync
+package notion
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/jomei/notionapi"
 )
 
-func getStringValueFromProperty(property notionapi.Property) string {
+func GetStringValueFromProperty(property notionapi.Property) string {
 	switch property.GetType() {
 	case notionapi.PropertyTypeRichText:
 		richText := property.(*notionapi.RichTextProperty).RichText

@@ -67,4 +67,20 @@ func configNameAndDeadlineKeys() {
 		log.Fatalf("Prompt failed %v\n", err)
 	}
 	viper.Set(keys.NOTION_DEADLINE_KEY, deadline)
+	prompt = promptui.Prompt{
+		Label: "Enter status key in notion database property",
+	}
+	key, err := prompt.Run()
+	if err != nil {
+		log.Fatalf("Prompt failed %v\n", err)
+	}
+	viper.Set(keys.NOTION_STATUS_KEY, key)
+	prompt = promptui.Prompt{
+		Label: "Enter done status value",
+	}
+	done, err := prompt.Run()
+	if err != nil {
+		log.Fatalf("Prompt failed %v\n", err)
+	}
+	viper.Set(keys.NOTION_DONE_STATUS_VALUE, done)
 }
