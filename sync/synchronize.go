@@ -4,12 +4,12 @@ import (
 	"context"
 	"log"
 
-	"github.com/mati2251/notion-to-google-tasks/utils/config/auth"
-	"github.com/mati2251/notion-to-google-tasks/utils/config/connections"
-	"github.com/mati2251/notion-to-google-tasks/utils/keys"
-	"github.com/mati2251/notion-to-google-tasks/utils/models"
-	"github.com/mati2251/notion-to-google-tasks/utils/sync/google"
-	"github.com/mati2251/notion-to-google-tasks/utils/sync/notion"
+	"github.com/mati2251/notion-to-google-tasks/config/auth"
+	"github.com/mati2251/notion-to-google-tasks/config/connections"
+	"github.com/mati2251/notion-to-google-tasks/keys"
+	"github.com/mati2251/notion-to-google-tasks/models"
+	"github.com/mati2251/notion-to-google-tasks/sync/google"
+	"github.com/mati2251/notion-to-google-tasks/sync/notion"
 )
 
 func Sync() {

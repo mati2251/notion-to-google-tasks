@@ -5,10 +5,10 @@ import (
 	"log"
 
 	"github.com/jomei/notionapi"
-	"github.com/mati2251/notion-to-google-tasks/utils/config/auth"
-	"github.com/mati2251/notion-to-google-tasks/utils/keys"
-	"github.com/mati2251/notion-to-google-tasks/utils/models"
-	"github.com/mati2251/notion-to-google-tasks/utils/sync/notion"
+	"github.com/mati2251/notion-to-google-tasks/config/auth"
+	"github.com/mati2251/notion-to-google-tasks/keys"
+	"github.com/mati2251/notion-to-google-tasks/models"
+	"github.com/mati2251/notion-to-google-tasks/sync/notion"
 	"google.golang.org/api/tasks/v1"
 )
 

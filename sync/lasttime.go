@@ -3,7 +3,7 @@ package sync
 import (
 	"time"
 
-	"github.com/mati2251/notion-to-google-tasks/utils/keys"
+	"github.com/mati2251/notion-to-google-tasks/keys"
 
 	"github.com/spf13/viper"
 )

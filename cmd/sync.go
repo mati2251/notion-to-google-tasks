@@ -3,8 +3,8 @@ package cmd
 import (
 	"log"
 
-	"github.com/mati2251/notion-to-google-tasks/utils/config/auth"
-	"github.com/mati2251/notion-to-google-tasks/utils/sync"
+	"github.com/mati2251/notion-to-google-tasks/config/auth"
+	"github.com/mati2251/notion-to-google-tasks/sync"
 	"github.com/spf13/cobra"
 )
 

@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/manifoldco/promptui"
-	"github.com/mati2251/notion-to-google-tasks/utils/keys"
+	"github.com/mati2251/notion-to-google-tasks/keys"
 	"github.com/spf13/viper"
 	"golang.org/x/oauth2"
 	"google.golang.org/api/option"

@@ -1,7 +1,7 @@
 package connections
 
 import (
-	"github.com/mati2251/notion-to-google-tasks/utils/models"
+	"github.com/mati2251/notion-to-google-tasks/models"
 	"github.com/spf13/viper"
 )
 

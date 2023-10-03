@@ -8,7 +8,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/jomei/notionapi"
 	"github.com/manifoldco/promptui"
-	"github.com/mati2251/notion-to-google-tasks/utils/config/auth"
+	"github.com/mati2251/notion-to-google-tasks/config/auth"
 	"github.com/spf13/viper"
 	"google.golang.org/api/tasks/v1"
 )

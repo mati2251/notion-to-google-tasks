@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/jomei/notionapi"
-	"github.com/mati2251/notion-to-google-tasks/utils/config/auth"
+	"github.com/mati2251/notion-to-google-tasks/config/auth"
 	"google.golang.org/api/tasks/v1"
 )
 
