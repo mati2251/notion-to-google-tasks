@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"log"
 
 	"github.com/jomei/notionapi"
@@ -15,18 +16,22 @@ type ConnectedTask struct {
 }
 
 type Connection struct {
-	NotionDatabase notionapi.DatabaseID
+	NotionDatabase *notionapi.Database
 	TasksList      *tasks.TaskList
 }
 
 func GetConnectionFromIds(notionDatabaseId string, tasksListId string) Connection {
-	notionDatabaseIdObj := notionapi.DatabaseID(notionDatabaseId)
+	notionDatabaseIdObject := notionapi.DatabaseID(notionDatabaseId)
+	notionDatabase, err := auth.NotionClient.Database.Get(context.Background(), notionDatabaseIdObject)
 	tasksList, err := auth.TasksService.Tasklists.Get(tasksListId).Do()
 	if err != nil {
 		log.Fatalf("Error getting google tasklist: %v", err)
 	}
+	if err != nil {
+		log.Fatalf("Error getting notion database: %v", err)
+	}
 	return Connection{
-		NotionDatabase: notionDatabaseIdObj,
+		NotionDatabase: notionDatabase,
 		TasksList:      tasksList,
 	}
 }

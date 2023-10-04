@@ -3,21 +3,19 @@ package sync
 import (
 	"time"
 
-	"github.com/jomei/notionapi"
-	"google.golang.org/api/tasks/v1"
+	"github.com/mati2251/notion-to-google-tasks/models"
+	"github.com/mati2251/notion-to-google-tasks/sync/google"
 )
 
-func updateTask(notionPage notionapi.Page, googleTask *tasks.Task, force bool) error {
-	googleTime, err := time.Parse(time.RFC3339, googleTask.Updated)
+func updateTask(connectedTask models.ConnectedTask, force bool) error {
+	googleTime, err := time.Parse(time.RFC3339, connectedTask.Task.Updated)
 	if err != nil {
 		return err
 	}
-	if notionPage.LastEditedTime.After(googleTime) || force {
-
+	if connectedTask.Notion.LastEditedTime.Before(googleTime) {
+		// notion.UpdateNotion(connectedTask)
+	} else if connectedTask.Notion.LastEditedTime.After(googleTime) || force {
+		google.UpdateGoogle(connectedTask)
 	}
 	return nil
-}
-
-func updateGoogle(notionPage notionapi.Page, googleTask *tasks.Task) {
-
 }

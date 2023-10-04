@@ -37,7 +37,10 @@ func CreateNewTask(connectedTask models.ConnectedTask) string {
 	if err != nil {
 		log.Fatalf("Error creating task: %v", err)
 	}
-	notion.InsertTaskId(connectedTask)
+	err = notion.UpdateValueFromProp(connectedTask.Notion, keys.TASK_ID_KEY, connectedTask.Task.Id)
+	if err != nil {
+		log.Fatalf("Error updating notion page: %v", err)
+	}
 	return task.Id
 }
 
@@ -47,4 +50,8 @@ func createNotes(tuple notionapi.Page) string {
 	notes += fmt.Sprintf("%v: %v\n", keys.NOTION_LINK_KEY, tuple.URL)
 	notes += fmt.Sprintf("%v: %v\n", keys.NOTION_ID_KEY, tuple.ID)
 	return notes
+}
+
+func UpdateGoogle(connectedTask models.ConnectedTask) {
+
 }

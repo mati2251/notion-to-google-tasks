@@ -2,8 +2,8 @@ package sync
 
 import (
 	"context"
-	"log"
 
+	"github.com/jomei/notionapi"
 	"github.com/mati2251/notion-to-google-tasks/config/auth"
 	"github.com/mati2251/notion-to-google-tasks/config/connections"
 	"github.com/mati2251/notion-to-google-tasks/keys"
@@ -21,8 +21,9 @@ func Sync() {
 func ForceSync() {
 	connections := connections.GetConnections()
 	for _, connection := range connections {
-		items, _ := auth.NotionClient.Database.Query(context.Background(), connection.NotionDatabase, nil)
-		notion.CreateDbPropTasksIdIfNotExists(connection.NotionDatabase)
+		databaseId := notionapi.DatabaseID(connection.NotionDatabase.ID)
+		items, _ := auth.NotionClient.Database.Query(context.Background(), databaseId, nil)
+		notion.CreateDbPropTasksIdIfNotExists(databaseId)
 		for _, item := range items.Results {
 			tasksId := notion.GetStringValueFromProperty(item.Properties[keys.TASK_ID_KEY])
 			if tasksId == "" {
@@ -33,11 +34,16 @@ func ForceSync() {
 				})
 			} else {
 				task, err := auth.TasksService.Tasks.Get(connection.TasksList.Id, tasksId).Do()
-				log.Default().Println(task)
+				connectedTask := models.ConnectedTask{
+					Notion:     &item,
+					Task:       task,
+					Connection: &connection,
+				}
 				if err != nil {
 					// check done notion task
+				} else {
+					updateTask(connectedTask, true)
 				}
-				// updateTask(item, task)
 			}
 		}
 	}

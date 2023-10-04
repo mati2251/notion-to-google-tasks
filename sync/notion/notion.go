@@ -9,7 +9,6 @@ import (
 	"github.com/jomei/notionapi"
 	"github.com/mati2251/notion-to-google-tasks/config/auth"
 	"github.com/mati2251/notion-to-google-tasks/keys"
-	"github.com/mati2251/notion-to-google-tasks/models"
 	"github.com/spf13/viper"
 )
 
@@ -60,24 +59,4 @@ func GetPropsToString(page notionapi.Page) string {
 		}
 	}
 	return propsString
-}
-
-func InsertTaskId(connectedTask models.ConnectedTask) {
-	_, err := auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(connectedTask.Notion.ID), &notionapi.PageUpdateRequest{
-		Properties: notionapi.Properties{
-			keys.TASK_ID_KEY: &notionapi.RichTextProperty{
-				RichText: []notionapi.RichText{
-					{
-						Type: "text",
-						Text: &notionapi.Text{
-							Content: connectedTask.Task.Id,
-						},
-					},
-				},
-			},
-		},
-	})
-	if err != nil {
-		log.Fatalf("Error updating page: %v", err)
-	}
 }

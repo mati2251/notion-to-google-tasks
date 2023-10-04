@@ -1,9 +1,14 @@
 package notion
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/jomei/notionapi"
+	"github.com/mati2251/notion-to-google-tasks/config/auth"
 )
 
 func GetStringValueFromProperty(property notionapi.Property) string {
@@ -114,4 +119,89 @@ func GetStringValueFromProperty(property notionapi.Property) string {
 	default:
 		return ""
 	}
+}
+
+func UpdateValueFromProp(page *notionapi.Page, key string, newValue string) error {
+	property := page.Properties[key]
+	var obj notionapi.Property = property
+	switch property.GetType() {
+	case notionapi.PropertyTypeRichText:
+		obj.(*notionapi.RichTextProperty).RichText = []notionapi.RichText{
+			{
+				Type: "text",
+				Text: &notionapi.Text{
+					Content: newValue,
+				},
+			}}
+	case notionapi.PropertyTypeText:
+		obj.(*notionapi.TextProperty).Text = []notionapi.RichText{
+			{
+				Type: "text",
+				Text: &notionapi.Text{
+					Content: newValue,
+				},
+			}}
+	case notionapi.PropertyTypeTitle:
+		obj.(*notionapi.TitleProperty).Title = []notionapi.RichText{
+			{
+				Type: "text",
+				Text: &notionapi.Text{
+					Content: newValue,
+				},
+			}}
+	case notionapi.PropertyTypeNumber:
+		num, err := strconv.ParseFloat(newValue, 64)
+		if err != nil {
+			return errors.Join(err, errors.New("error parsing newValue to float"))
+		}
+		obj.(*notionapi.NumberProperty).Number = num
+	case notionapi.PropertyTypeSelect:
+		obj.(*notionapi.SelectProperty).Select.Name = newValue
+		obj.(*notionapi.SelectProperty).Select.ID = ""
+		obj.(*notionapi.SelectProperty).Select.Color = ""
+	case notionapi.PropertyTypeDate:
+		date, err := time.Parse(time.RFC3339, newValue)
+		notionDate := notionapi.Date(date)
+		if err != nil {
+			return errors.Join(err, errors.New("error parsing newValue to time"))
+		}
+		obj.(*notionapi.DateProperty).Date.Start = &notionDate
+		obj.(*notionapi.DateProperty).Date.End = &notionDate
+	case notionapi.PropertyTypeCheckbox:
+		checked, err := strconv.ParseBool(newValue)
+		if err != nil {
+			return errors.Join(err, errors.New("error parsing newValue to bool"))
+		}
+		obj.(*notionapi.CheckboxProperty).Checkbox = checked
+	case notionapi.PropertyTypeURL:
+		obj.(*notionapi.URLProperty).URL = newValue
+	case notionapi.PropertyTypeEmail:
+		obj.(*notionapi.EmailProperty).Email = newValue
+	case notionapi.PropertyTypePhoneNumber:
+		obj.(*notionapi.PhoneNumberProperty).PhoneNumber = newValue
+	case notionapi.PropertyTypeCreatedTime:
+		date, err := time.Parse(time.RFC3339, newValue)
+		if err != nil {
+			return errors.Join(err, errors.New("error parsing newValue to time"))
+		}
+		obj.(*notionapi.CreatedTimeProperty).CreatedTime = date
+	case notionapi.PropertyTypeLastEditedTime:
+		date, err := time.Parse(time.RFC3339, newValue)
+		if err != nil {
+			return errors.Join(err, errors.New("error parsing newValue to time"))
+		}
+		obj.(*notionapi.LastEditedTimeProperty).LastEditedTime = date
+	case notionapi.PropertyTypeStatus:
+		obj.(*notionapi.StatusProperty).Status.Name = newValue
+		obj.(*notionapi.StatusProperty).Status.ID = ""
+		obj.(*notionapi.StatusProperty).Status.Color = ""
+	default:
+		return errors.New("roperty type not supported")
+	}
+	page, err := auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(page.ID), &notionapi.PageUpdateRequest{
+		Properties: notionapi.Properties{
+			key: obj,
+		},
+	})
+	return err
 }
