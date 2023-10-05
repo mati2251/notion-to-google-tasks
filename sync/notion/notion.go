@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/jomei/notionapi"
 	"github.com/mati2251/notion-to-google-tasks/config/auth"
@@ -16,15 +17,16 @@ import (
 func CreateDbPropTasksIdIfNotExists(databaseId notionapi.DatabaseID) {
 	result, _ := auth.NotionClient.Database.Query(context.Background(), databaseId, nil)
 	if result.Results[0].Properties[keys.TASK_ID_KEY] == nil {
-		createDbPropTasksId(databaseId)
+		CreateProp(databaseId, keys.TASK_ID_KEY, "rich_te")
 	}
 }
 
-func createDbPropTasksId(databaseId notionapi.DatabaseID) {
+func CreateProp(databaseId notionapi.DatabaseID, key string, propertyType string) {
+	propertyType_ := notionapi.PropertyConfigType(propertyType)
 	defaultValue := &notionapi.RichTextPropertyConfig{
-		Type: "rich_text",
+		Type: propertyType_,
 	}
-	properties := notionapi.PropertyConfigs(map[string]notionapi.PropertyConfig{keys.TASK_ID_KEY: defaultValue})
+	properties := notionapi.PropertyConfigs(map[string]notionapi.PropertyConfig{key: defaultValue})
 	_, err := auth.NotionClient.Database.Update(context.Background(), databaseId, &notionapi.DatabaseUpdateRequest{
 		Properties: properties,
 	})
@@ -74,6 +76,35 @@ func Update(connectedTask models.ConnectedTask) error {
 	}
 	if err != nil {
 		return errors.Join(err, errors.New("error updating notion page"))
+	}
+	return nil
+}
+
+func New(connectedTask models.ConnectedTask) error {
+	newTitle := connectedTask.Task.Title
+	newDue, err := time.Parse(time.RFC3339, connectedTask.Task.Due)
+	newDueNotion := notionapi.Date(newDue)
+	if err != nil {
+		return errors.Join(err, errors.New("error parsing due date"))
+	}
+	Properties := notionapi.Properties{
+		viper.GetString(keys.NOTION_NAME_KEY): NewRichTextProperty(newTitle),
+		viper.GetString(keys.NOTION_DEADLINE_KEY): notionapi.DateProperty{
+			Type: "date",
+			Date: &notionapi.DateObject{
+				Start: &newDueNotion,
+			},
+		},
+	}
+	_, err = auth.NotionClient.Page.Create(context.Background(), &notionapi.PageCreateRequest{
+		Properties: Properties,
+		Parent: notionapi.Parent{
+			Type:       "database_id",
+			DatabaseID: notionapi.DatabaseID(connectedTask.Connection.NotionDatabase.ID),
+		},
+	})
+	if err != nil {
+		return errors.Join(err, errors.New("error creating notion tuple"))
 	}
 	return nil
 }
