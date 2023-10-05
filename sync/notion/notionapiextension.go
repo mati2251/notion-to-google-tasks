@@ -198,7 +198,7 @@ func UpdateValueFromProp(page *notionapi.Page, key string, newValue string) erro
 		obj.(*notionapi.StatusProperty).Status.ID = ""
 		obj.(*notionapi.StatusProperty).Status.Color = ""
 	default:
-		return errors.New("roperty type not supported")
+		return errors.New("property type not supported")
 	}
 	_, err := auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(page.ID), &notionapi.PageUpdateRequest{
 		Properties: notionapi.Properties{
