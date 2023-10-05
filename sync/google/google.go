@@ -1,32 +1,27 @@
 package google
 
 import (
+	"errors"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/jomei/notionapi"
 	"github.com/mati2251/notion-to-google-tasks/config/auth"
 	"github.com/mati2251/notion-to-google-tasks/keys"
 	"github.com/mati2251/notion-to-google-tasks/models"
 	"github.com/mati2251/notion-to-google-tasks/sync/notion"
+	"github.com/spf13/viper"
 	"google.golang.org/api/tasks/v1"
 )
 
-func updateNotes(notionPage notionapi.Page, taskId string, connection models.Connection) string {
-	// auth.TasksService.Tasks.Update(connection.TasksList.Id, taskId, &tasks.Task{
-	// 	Notes: createNotes(notionPage),
-
-	// })
-	return ""
-}
-
 func CreateNewTask(connectedTask models.ConnectedTask) string {
-	title, err := notion.GetName(*connectedTask.Notion)
+	title, err := notion.GetProp(*connectedTask.Notion, keys.NOTION_NAME_KEY)
 	if err != nil {
 		log.Fatalf("Error getting name from notion page: %v", err)
 	}
 	notes := createNotes(*connectedTask.Notion)
-	due := notion.GetDeadlineForTasks(*connectedTask.Notion)
+	due, _ := notion.GetProp(*connectedTask.Notion, keys.NOTION_DEADLINE_KEY)
 	newTask := &tasks.Task{
 		Title: title,
 		Notes: notes,
@@ -52,6 +47,34 @@ func createNotes(tuple notionapi.Page) string {
 	return notes
 }
 
-func UpdateGoogle(connectedTask models.ConnectedTask) {
-
+func Update(connectedTask models.ConnectedTask) error {
+	title, err := notion.GetProp(*connectedTask.Notion, keys.NOTION_NAME_KEY)
+	if err != nil {
+		return errors.Join(err, errors.New("error getting nontio page"))
+	}
+	notes := strings.Split(connectedTask.Task.Notes, keys.BREAK_LINE)
+	if len(notes) > 1 {
+		notes = notes[:1]
+	}
+	notes = append(notes, createNotes(*connectedTask.Notion))
+	due, err := notion.GetProp(*connectedTask.Notion, keys.NOTION_DEADLINE_KEY)
+	if err != nil {
+		return errors.Join(err, errors.New("error getting deadline from notion page"))
+	}
+	done, err := notion.GetProp(*connectedTask.Notion, keys.NOTION_STATUS_KEY)
+	if err != nil {
+		return errors.Join(err, errors.New("error getting status from notion page"))
+	}
+	if done == viper.GetString(keys.NOTION_DONE_STATUS_VALUE) {
+		connectedTask.Task.Status = "completed"
+	}
+	newTask := connectedTask.Task
+	newTask.Title = title
+	newTask.Notes = strings.Join(notes, "")
+	newTask.Due = due
+	_, err = auth.TasksService.Tasks.Update(connectedTask.Connection.TasksList.Id, connectedTask.Task.Id, newTask).Do()
+	if err != nil {
+		return errors.Join(err, errors.New("error updating task"))
+	}
+	return nil
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/mati2251/notion-to-google-tasks/models"
 	"github.com/mati2251/notion-to-google-tasks/sync/google"
 	"github.com/mati2251/notion-to-google-tasks/sync/notion"
+	"github.com/spf13/viper"
 )
 
 func Sync() {
@@ -40,7 +41,7 @@ func ForceSync() {
 					Connection: &connection,
 				}
 				if err != nil {
-					// check done notion task
+					notion.UpdateValueFromProp(&item, viper.GetString(keys.NOTION_STATUS_KEY), viper.GetString(keys.NOTION_DONE_STATUS_VALUE))
 				} else {
 					updateTask(connectedTask, true)
 				}

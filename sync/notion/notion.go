@@ -9,6 +9,7 @@ import (
 	"github.com/jomei/notionapi"
 	"github.com/mati2251/notion-to-google-tasks/config/auth"
 	"github.com/mati2251/notion-to-google-tasks/keys"
+	"github.com/mati2251/notion-to-google-tasks/models"
 	"github.com/spf13/viper"
 )
 
@@ -32,21 +33,12 @@ func createDbPropTasksId(databaseId notionapi.DatabaseID) {
 	}
 }
 
-func GetName(page notionapi.Page) (string, error) {
-	nameKey := viper.GetString(keys.NOTION_NAME_KEY)
-	if page.Properties[nameKey] == nil {
-		return "", errors.New("Invalid notion name key: " + nameKey)
+func GetProp(page notionapi.Page, viperKey string) (string, error) {
+	key := viper.GetString(viperKey)
+	if page.Properties[key] == nil {
+		return "", errors.New("Invalid notion key: " + key)
 	}
-	return GetStringValueFromProperty(page.Properties[nameKey]), nil
-}
-
-func GetDeadlineForTasks(page notionapi.Page) string {
-	deadlineKey := viper.GetString(keys.NOTION_DEADLINE_KEY)
-	deadline := ""
-	if page.Properties[deadlineKey] != nil {
-		deadline = GetStringValueFromProperty(page.Properties[deadlineKey])
-	}
-	return deadline
+	return GetStringValueFromProperty(page.Properties[key]), nil
 }
 
 func GetPropsToString(page notionapi.Page) string {
@@ -59,4 +51,29 @@ func GetPropsToString(page notionapi.Page) string {
 		}
 	}
 	return propsString
+}
+
+func Update(connectedTask models.ConnectedTask) error {
+	newTitle := connectedTask.Task.Title
+	newDue := connectedTask.Task.Due
+	done := connectedTask.Task.Status == "completed"
+	var err error = nil
+	if done {
+		doneErr := UpdateValueFromProp(connectedTask.Notion, viper.GetString(keys.NOTION_STATUS_KEY), viper.GetString(keys.NOTION_DONE_STATUS_VALUE))
+		if doneErr != nil {
+			err = errors.Join(err, doneErr)
+		}
+	}
+	dueErr := UpdateValueFromProp(connectedTask.Notion, viper.GetString(keys.NOTION_DEADLINE_KEY), newDue)
+	if dueErr != nil {
+		err = errors.Join(err, dueErr)
+	}
+	titleErr := UpdateValueFromProp(connectedTask.Notion, viper.GetString(keys.NOTION_NAME_KEY), newTitle)
+	if titleErr != nil {
+		return errors.Join(err, titleErr)
+	}
+	if err != nil {
+		return errors.Join(err, errors.New("error updating notion page"))
+	}
+	return nil
 }

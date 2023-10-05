@@ -123,6 +123,9 @@ func GetStringValueFromProperty(property notionapi.Property) string {
 
 func UpdateValueFromProp(page *notionapi.Page, key string, newValue string) error {
 	property := page.Properties[key]
+	if property == nil {
+		return errors.New("property not found")
+	}
 	var obj notionapi.Property = property
 	switch property.GetType() {
 	case notionapi.PropertyTypeRichText:
@@ -166,7 +169,6 @@ func UpdateValueFromProp(page *notionapi.Page, key string, newValue string) erro
 			return errors.Join(err, errors.New("error parsing newValue to time"))
 		}
 		obj.(*notionapi.DateProperty).Date.Start = &notionDate
-		obj.(*notionapi.DateProperty).Date.End = &notionDate
 	case notionapi.PropertyTypeCheckbox:
 		checked, err := strconv.ParseBool(newValue)
 		if err != nil {
@@ -198,7 +200,7 @@ func UpdateValueFromProp(page *notionapi.Page, key string, newValue string) erro
 	default:
 		return errors.New("roperty type not supported")
 	}
-	page, err := auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(page.ID), &notionapi.PageUpdateRequest{
+	_, err := auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(page.ID), &notionapi.PageUpdateRequest{
 		Properties: notionapi.Properties{
 			key: obj,
 		},

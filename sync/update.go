@@ -5,6 +5,7 @@ import (
 
 	"github.com/mati2251/notion-to-google-tasks/models"
 	"github.com/mati2251/notion-to-google-tasks/sync/google"
+	"github.com/mati2251/notion-to-google-tasks/sync/notion"
 )
 
 func updateTask(connectedTask models.ConnectedTask, force bool) error {
@@ -13,9 +14,9 @@ func updateTask(connectedTask models.ConnectedTask, force bool) error {
 		return err
 	}
 	if connectedTask.Notion.LastEditedTime.Before(googleTime) {
-		// notion.UpdateNotion(connectedTask)
+		notion.Update(connectedTask)
 	} else if connectedTask.Notion.LastEditedTime.After(googleTime) || force {
-		google.UpdateGoogle(connectedTask)
+		google.Update(connectedTask)
 	}
 	return nil
 }
