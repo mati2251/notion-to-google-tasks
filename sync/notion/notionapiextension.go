@@ -207,3 +207,20 @@ func UpdateValueFromProp(page *notionapi.Page, key string, newValue string) erro
 	})
 	return err
 }
+
+func NewRichText(content string) notionapi.RichText {
+	return notionapi.RichText{
+		Type: "text",
+		Text: &notionapi.Text{
+			Content: content,
+		},
+	}
+}
+
+func NewRichTextProperty(content string) notionapi.RichTextProperty {
+	return notionapi.RichTextProperty{
+		RichText: []notionapi.RichText{
+			NewRichText(content),
+		},
+	}
+}
