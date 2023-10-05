@@ -14,20 +14,16 @@ import (
 	"github.com/spf13/viper"
 )
 
-func CreateDbPropTasksIdIfNotExists(databaseId notionapi.DatabaseID) {
-	result, _ := auth.NotionClient.Database.Query(context.Background(), databaseId, nil)
-	if result.Results[0].Properties[keys.TASK_ID_KEY] == nil {
-		CreateProp(databaseId, keys.TASK_ID_KEY, "rich_te")
+func CreateProp(database notionapi.Database, key string, propertyType string) {
+	if database.Properties[key] != nil {
+		return
 	}
-}
-
-func CreateProp(databaseId notionapi.DatabaseID, key string, propertyType string) {
 	propertyType_ := notionapi.PropertyConfigType(propertyType)
 	defaultValue := &notionapi.RichTextPropertyConfig{
 		Type: propertyType_,
 	}
 	properties := notionapi.PropertyConfigs(map[string]notionapi.PropertyConfig{key: defaultValue})
-	_, err := auth.NotionClient.Database.Update(context.Background(), databaseId, &notionapi.DatabaseUpdateRequest{
+	_, err := auth.NotionClient.Database.Update(context.Background(), notionapi.DatabaseID(database.ID), &notionapi.DatabaseUpdateRequest{
 		Properties: properties,
 	})
 	if err != nil {

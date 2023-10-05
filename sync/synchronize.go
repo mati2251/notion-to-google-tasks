@@ -24,7 +24,7 @@ func ForceSync() {
 	for _, connection := range connections {
 		databaseId := notionapi.DatabaseID(connection.NotionDatabase.ID)
 		items, _ := auth.NotionClient.Database.Query(context.Background(), databaseId, nil)
-		notion.CreateDbPropTasksIdIfNotExists(databaseId)
+		notion.CreateProp(*connection.NotionDatabase, keys.TASK_ID_KEY, "rich_text")
 		for _, item := range items.Results {
 			tasksId := notion.GetStringValueFromProperty(item.Properties[keys.TASK_ID_KEY])
 			if tasksId == "" {
