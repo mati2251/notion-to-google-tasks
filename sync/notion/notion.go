@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/jomei/notionapi"
@@ -14,9 +13,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-func CreateProp(database notionapi.Database, key string, propertyType string) {
+func CreateProp(database notionapi.Database, key string, propertyType string) error {
 	if database.Properties[key] != nil {
-		return
+		return errors.New("property already exists")
 	}
 	propertyType_ := notionapi.PropertyConfigType(propertyType)
 	defaultValue := &notionapi.RichTextPropertyConfig{
@@ -27,8 +26,22 @@ func CreateProp(database notionapi.Database, key string, propertyType string) {
 		Properties: properties,
 	})
 	if err != nil {
-		log.Fatalf("Error updating database: %v", err)
+		return errors.Join(err, errors.New("error creating notion property"))
 	}
+	return nil
+}
+
+func RemoveProp(database notionapi.Database, key string) error {
+	if database.Properties[key] == nil {
+		return errors.New("property doesn't exist")
+	}
+	_, err := auth.NotionClient.Database.Update(context.Background(), notionapi.DatabaseID(database.ID), &notionapi.DatabaseUpdateRequest{
+		Properties: notionapi.PropertyConfigs(map[string]notionapi.PropertyConfig{key: nil}),
+	})
+	if err != nil {
+		return errors.Join(err, errors.New("error removing notion property"))
+	}
+	return nil
 }
 
 func GetProp(page notionapi.Page, viperKey string) (string, error) {
@@ -76,23 +89,25 @@ func Update(connectedTask models.ConnectedTask) error {
 	return nil
 }
 
-func New(connectedTask models.ConnectedTask) error {
+func New(connectedTask models.ConnectedTask) (*notionapi.Page, error) {
 	newTitle := connectedTask.Task.Title
-	newDue, err := time.Parse(time.RFC3339, connectedTask.Task.Due)
+	newDue, _ := time.Parse(time.RFC3339, connectedTask.Task.Due)
 	newDueNotion := notionapi.Date(newDue)
-	if err != nil {
-		return errors.Join(err, errors.New("error parsing due date"))
-	}
+	newTasksId := connectedTask.Task.Id
 	Properties := notionapi.Properties{
-		viper.GetString(keys.NOTION_NAME_KEY): NewRichTextProperty(newTitle),
+		viper.GetString(keys.NOTION_NAME_KEY): notionapi.TitleProperty{
+			Type:  "title",
+			Title: []notionapi.RichText{{Type: "text", Text: &notionapi.Text{Content: newTitle}}},
+		},
 		viper.GetString(keys.NOTION_DEADLINE_KEY): notionapi.DateProperty{
 			Type: "date",
 			Date: &notionapi.DateObject{
 				Start: &newDueNotion,
 			},
 		},
+		keys.TASK_ID_KEY: NewRichTextProperty(newTasksId),
 	}
-	_, err = auth.NotionClient.Page.Create(context.Background(), &notionapi.PageCreateRequest{
+	page, err := auth.NotionClient.Page.Create(context.Background(), &notionapi.PageCreateRequest{
 		Properties: Properties,
 		Parent: notionapi.Parent{
 			Type:       "database_id",
@@ -100,7 +115,7 @@ func New(connectedTask models.ConnectedTask) error {
 		},
 	})
 	if err != nil {
-		return errors.Join(err, errors.New("error creating notion tuple"))
+		return nil, errors.Join(err, errors.New("error creating notion tuple"))
 	}
-	return nil
+	return page, nil
 }
