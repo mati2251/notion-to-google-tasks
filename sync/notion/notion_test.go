@@ -55,6 +55,7 @@ func TestNewGetProp(t *testing.T) {
 		Connection: &connection,
 	}
 	page, err := New(conn)
+	conn.Notion = page
 	if err != nil {
 		t.Error(err)
 	}
@@ -86,8 +87,12 @@ func TestNewGetProp(t *testing.T) {
 		t.Error("Bad notion update tuple deadline")
 	}
 	t.Cleanup(func() {
-		auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(page.ID), &notionapi.PageUpdateRequest{
-			Archived: true,
+		_, err := auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(page.ID), &notionapi.PageUpdateRequest{
+			Archived:   true,
+			Properties: notionapi.Properties{},
 		})
+		if err != nil {
+			t.Error(err)
+		}
 	})
 }
