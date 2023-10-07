@@ -32,7 +32,7 @@ func CreateNewTask(connectedTask models.ConnectedTask) string {
 	if err != nil {
 		log.Fatalf("Error creating task: %v", err)
 	}
-	err = notion.UpdateValueFromProp(connectedTask.Notion, keys.TASK_ID_KEY, connectedTask.Task.Id)
+	_, err = notion.UpdateValueFromProp(connectedTask.Notion, keys.TASK_ID_KEY, connectedTask.Task.Id)
 	if err != nil {
 		log.Fatalf("Error updating notion page: %v", err)
 	}

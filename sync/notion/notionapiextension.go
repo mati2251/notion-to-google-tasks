@@ -121,10 +121,10 @@ func GetStringValueFromProperty(property notionapi.Property) string {
 	}
 }
 
-func UpdateValueFromProp(page *notionapi.Page, key string, newValue string) error {
+func UpdateValueFromProp(page *notionapi.Page, key string, newValue string) (*notionapi.Page, error) {
 	property := page.Properties[key]
 	if property == nil {
-		return errors.New("property not found")
+		return nil, errors.New("property not found")
 	}
 	var obj notionapi.Property = property
 	switch property.GetType() {
@@ -155,7 +155,7 @@ func UpdateValueFromProp(page *notionapi.Page, key string, newValue string) erro
 	case notionapi.PropertyTypeNumber:
 		num, err := strconv.ParseFloat(newValue, 64)
 		if err != nil {
-			return errors.Join(err, errors.New("error parsing newValue to float"))
+			return nil, errors.Join(err, errors.New("error parsing newValue to float"))
 		}
 		obj.(*notionapi.NumberProperty).Number = num
 	case notionapi.PropertyTypeSelect:
@@ -166,13 +166,13 @@ func UpdateValueFromProp(page *notionapi.Page, key string, newValue string) erro
 		date, err := time.Parse(time.RFC3339, newValue)
 		notionDate := notionapi.Date(date)
 		if err != nil {
-			return errors.Join(err, errors.New("error parsing newValue to time"))
+			return nil, errors.Join(err, errors.New("error parsing newValue to time"))
 		}
 		obj.(*notionapi.DateProperty).Date.Start = &notionDate
 	case notionapi.PropertyTypeCheckbox:
 		checked, err := strconv.ParseBool(newValue)
 		if err != nil {
-			return errors.Join(err, errors.New("error parsing newValue to bool"))
+			return nil, errors.Join(err, errors.New("error parsing newValue to bool"))
 		}
 		obj.(*notionapi.CheckboxProperty).Checkbox = checked
 	case notionapi.PropertyTypeURL:
@@ -184,13 +184,13 @@ func UpdateValueFromProp(page *notionapi.Page, key string, newValue string) erro
 	case notionapi.PropertyTypeCreatedTime:
 		date, err := time.Parse(time.RFC3339, newValue)
 		if err != nil {
-			return errors.Join(err, errors.New("error parsing newValue to time"))
+			return nil, errors.Join(err, errors.New("error parsing newValue to time"))
 		}
 		obj.(*notionapi.CreatedTimeProperty).CreatedTime = date
 	case notionapi.PropertyTypeLastEditedTime:
 		date, err := time.Parse(time.RFC3339, newValue)
 		if err != nil {
-			return errors.Join(err, errors.New("error parsing newValue to time"))
+			return nil, errors.Join(err, errors.New("error parsing newValue to time"))
 		}
 		obj.(*notionapi.LastEditedTimeProperty).LastEditedTime = date
 	case notionapi.PropertyTypeStatus:
@@ -198,14 +198,14 @@ func UpdateValueFromProp(page *notionapi.Page, key string, newValue string) erro
 		obj.(*notionapi.StatusProperty).Status.ID = ""
 		obj.(*notionapi.StatusProperty).Status.Color = ""
 	default:
-		return errors.New("property type not supported")
+		return nil, errors.New("property type not supported")
 	}
-	_, err := auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(page.ID), &notionapi.PageUpdateRequest{
+	page, err := auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(page.ID), &notionapi.PageUpdateRequest{
 		Properties: notionapi.Properties{
 			key: obj,
 		},
 	})
-	return err
+	return page, err
 }
 
 func NewRichText(content string) notionapi.RichText {

@@ -68,4 +68,26 @@ func TestNewGetProp(t *testing.T) {
 	if test != conn.Task.Due {
 		t.Error("Bad notion new tuple deadline")
 	}
+	conn.Task.Title = "newTitle"
+	conn.Task.Due = "2021-01-02T00:00:00Z"
+	conn.Task.Status = "completed"
+	page, err = Update(conn)
+	if err != nil {
+		t.Error(err)
+	}
+	if GetStringValueFromProperty(page.Properties[keys.TASK_ID_KEY]) != conn.Task.Id {
+		t.Error("Bad notion update tuple task id")
+	}
+	if GetStringValueFromProperty(page.Properties[viper.GetString(keys.NOTION_NAME_KEY)]) != conn.Task.Title {
+		t.Error("Bad notion update tuple title")
+	}
+	test = GetStringValueFromProperty(page.Properties[viper.GetString(keys.NOTION_DEADLINE_KEY)])
+	if test != conn.Task.Due {
+		t.Error("Bad notion update tuple deadline")
+	}
+	t.Cleanup(func() {
+		auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(page.ID), &notionapi.PageUpdateRequest{
+			Archived: true,
+		})
+	})
 }
