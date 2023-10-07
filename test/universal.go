@@ -9,7 +9,6 @@ import (
 	"github.com/mati2251/notion-to-google-tasks/models"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"google.golang.org/api/tasks/v1"
 )
 
 func InitViper() {
@@ -28,8 +27,11 @@ func CreateMockConnection() models.Connection {
 	if err != nil {
 		panic(err)
 	}
-	new := &tasks.TaskList{Title: "test"}
-	newTaskList, err := auth.TasksService.Tasklists.Insert(new).Do()
+	taskListId := viper.GetString("google.test_list")
+	if taskListId == "" {
+		panic("google.test_list is not set")
+	}
+	taskList, err := auth.TasksService.Tasklists.Get(taskListId).Do()
 	if err != nil {
 		panic(err)
 	}
@@ -42,11 +44,14 @@ func CreateMockConnection() models.Connection {
 		panic(err)
 	}
 	return models.Connection{
-		TasksList:      newTaskList,
+		TasksList:      taskList,
 		NotionDatabase: newDb,
 	}
 }
 
-func CreateMockPage(conn models.Connection) {
-	conn := CreateMockConnection()
+func CleanUpMock(conn models.Connection) {
+	err := auth.TasksService.Tasklists.Delete(conn.TasksList.Id).Do()
+	if err != nil {
+		panic(err)
+	}
 }

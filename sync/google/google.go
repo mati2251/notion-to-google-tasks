@@ -15,7 +15,7 @@ import (
 	"google.golang.org/api/tasks/v1"
 )
 
-func CreateNewTask(connectedTask models.ConnectedTask) string {
+func CreateNewTask(connectedTask models.ConnectedTask) *tasks.Task {
 	title, err := notion.GetProp(*connectedTask.Notion, keys.NOTION_NAME_KEY)
 	if err != nil {
 		log.Fatalf("Error getting name from notion page: %v", err)
@@ -36,7 +36,7 @@ func CreateNewTask(connectedTask models.ConnectedTask) string {
 	if err != nil {
 		log.Fatalf("Error updating notion page: %v", err)
 	}
-	return task.Id
+	return task
 }
 
 func createNotes(tuple notionapi.Page) string {
