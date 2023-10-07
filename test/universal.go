@@ -48,15 +48,5 @@ func CreateMockConnection() models.Connection {
 }
 
 func CreateMockPage(conn models.Connection) {
-	// notionDatabaseId := notionapi.DatabaseID(conn.NotionDatabase.ID)
-	// page, err := auth.NotionClient.Page.Create(context.Background(), &notionapi.PageCreateRequest{
-	// 	Parent: notionapi.Parent{
-	// 		Type:       "database_id",
-	// 		DatabaseID: notionDatabaseId,
-	// 		// Properties: notionapi.Properties
-	// 	}})
-}
-
-func CreateMockTask() {
-
+	conn := CreateMockConnection()
 }
