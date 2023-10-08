@@ -121,3 +121,7 @@ func New(connectedTask models.ConnectedTask) (models.ConnectedTask, error) {
 	connectedTask.Notion = page
 	return connectedTask, nil
 }
+
+func SetDone(page *notionapi.Page) (*notionapi.Page, error) {
+	return UpdateValueFromProp(page, viper.GetString(keys.NOTION_STATUS_KEY), viper.GetString(keys.NOTION_DONE_STATUS_VALUE))
+}

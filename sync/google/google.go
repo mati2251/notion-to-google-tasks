@@ -80,3 +80,8 @@ func Update(connectedTask models.ConnectedTask) (models.ConnectedTask, error) {
 	}
 	return connectedTask, nil
 }
+
+func SetDone(tasksList tasks.TaskList, task *tasks.Task) (*tasks.Task, error) {
+	task.Status = "completed"
+	return auth.TasksService.Tasks.Update(tasksList.Id, task.Id, task).Do()
+}

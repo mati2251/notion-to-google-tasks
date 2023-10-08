@@ -78,7 +78,11 @@ func TestUpdateForceNotionDeleteGoogle(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	auth.TasksService.Tasks.Delete(connectedTask.Connection.TasksList.Id, connectedTask.Task.Id).Do()
+	err = auth.TasksService.Tasks.Delete(connectedTask.Connection.TasksList.Id, connectedTask.Task.Id).Do()
+	if err != nil {
+		t.Error(err)
+	}
+	connectedTask.Task = nil
 	connectedTask, err = update(connectedTask, true)
 	if err != nil {
 		t.Error(err)
