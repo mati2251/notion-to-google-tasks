@@ -10,7 +10,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "/home/mateusz/Projekty/notion-to-google-tasks/",
-            "args": "sync -f"
+            "args": "sync"
         }
     ]
 }

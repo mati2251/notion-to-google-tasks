@@ -58,6 +58,9 @@ func GetStringValueFromProperty(property notionapi.Property) string {
 		}
 		return value
 	case notionapi.PropertyTypeDate:
+		if property.(*notionapi.DateProperty).Date == nil {
+			return ""
+		}
 		return property.(*notionapi.DateProperty).Date.Start.String()
 	case notionapi.PropertyTypeFormula:
 		return property.(*notionapi.FormulaProperty).Formula.String
