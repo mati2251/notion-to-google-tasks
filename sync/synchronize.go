@@ -5,7 +5,6 @@ import (
 	"log"
 	"slices"
 	"strings"
-	"time"
 
 	"github.com/jomei/notionapi"
 	"github.com/mati2251/notion-to-google-tasks/config/auth"
@@ -20,30 +19,9 @@ import (
 func Sync(force bool) {
 	connections := connections.GetConnections()
 	for _, connection := range connections {
-		check, err := checkIsSyncRequired(connection, force)
-		if err != nil {
-			log.Fatalf("Error checking connection: %v", err)
-		}
-		if check {
-			itemsId := syncFromNotion(connection, force)
-			syncFromGoogle(connection, force, itemsId)
-			SetLastTimeSync()
-		}
+		itemsId := syncFromNotion(connection, force)
+		syncFromGoogle(connection, force, itemsId)
 	}
-}
-
-func checkIsSyncRequired(connection models.Connection, force bool) (bool, error) {
-	if force {
-		return true, nil
-	}
-	googleTime, err := time.Parse(time.RFC3339, connection.TasksList.Updated)
-	if err != nil {
-		return false, err
-	}
-	googleTime = googleTime.Add(-time.Duration(googleTime.Second()) * time.Second)
-	notionTime := connection.NotionDatabase.LastEditedTime
-	lastTimeSync := GetLastTimeSync()
-	return lastTimeSync.Before(googleTime) || lastTimeSync.Before(notionTime), nil
 }
 
 func syncFromNotion(connection models.Connection, force bool) []string {
@@ -52,7 +30,6 @@ func syncFromNotion(connection models.Connection, force bool) []string {
 	items, _ := auth.NotionClient.Database.Query(context.Background(), databaseId, nil)
 	notion.CreateProp(*connection.NotionDatabase, keys.TASK_ID_KEY, "rich_text")
 	for _, item := range items.Results {
-		itemsId = append(itemsId, item.ID.String())
 		tasksId := notion.GetStringValueFromProperty(item.Properties[keys.TASK_ID_KEY])
 		if tasksId == "" {
 			google.New(models.ConnectedTask{
@@ -73,6 +50,8 @@ func syncFromNotion(connection models.Connection, force bool) []string {
 				update(connectedTask, force)
 			}
 		}
+		tasksId = notion.GetStringValueFromProperty(item.Properties[keys.TASK_ID_KEY])
+		itemsId = append(itemsId, tasksId)
 	}
 	return itemsId
 }
@@ -87,11 +66,19 @@ func syncFromGoogle(connection models.Connection, force bool, itemsId []string) 
 					log.Fatalf("Error setting task done: %v", err)
 				}
 			} else {
-				notion.New(models.ConnectedTask{
+				connectedTask := models.ConnectedTask{
 					Notion:     nil,
 					Task:       task,
 					Connection: &connection,
-				})
+				}
+				connectedTask, err := notion.New(connectedTask)
+				if err != nil {
+					log.Fatalf("Error creating notion page: %v", err)
+				}
+				_, err = google.UpdateNotes(connectedTask)
+				if err != nil {
+					log.Fatalf("Error updating notes: %v", err)
+				}
 			}
 		}
 	}

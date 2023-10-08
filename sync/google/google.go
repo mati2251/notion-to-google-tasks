@@ -81,6 +81,18 @@ func Update(connectedTask models.ConnectedTask) (models.ConnectedTask, error) {
 	return connectedTask, nil
 }
 
+func UpdateNotes(connectedTask models.ConnectedTask) (models.ConnectedTask, error) {
+	notes := createNotes(*connectedTask.Notion)
+	newTask := connectedTask.Task
+	newTask.Notes = notes
+	task, err := auth.TasksService.Tasks.Update(connectedTask.Connection.TasksList.Id, connectedTask.Task.Id, newTask).Do()
+	connectedTask.Task = task
+	if err != nil {
+		return connectedTask, errors.Join(err, errors.New("error updating task"))
+	}
+	return connectedTask, nil
+}
+
 func SetDone(tasksList tasks.TaskList, task *tasks.Task) (*tasks.Task, error) {
 	task.Status = "completed"
 	return auth.TasksService.Tasks.Update(tasksList.Id, task.Id, task).Do()
