@@ -22,9 +22,9 @@ var syncCmd = &cobra.Command{
 			log.Fatalf("Error getting force flag: %v", err)
 		}
 		if isForce {
-			sync.ForceSync()
+			sync.Sync(true)
 		} else {
-			sync.Sync()
+			sync.Sync(false)
 		}
 	},
 }

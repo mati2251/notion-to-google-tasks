@@ -54,7 +54,7 @@ var configCmd = &cobra.Command{
 			connections.ConfigConnections()
 		}
 		if slices.Contains(specifics, "first-scan") {
-			sync.ForceSync()
+			sync.Sync(true)
 		}
 	},
 }
