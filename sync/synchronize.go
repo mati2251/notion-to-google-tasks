@@ -23,6 +23,7 @@ func Sync(force bool) {
 			log.Fatalf("Error checking connection: %v", err)
 		}
 		if check {
+			checkTasksArchivedOnNotion(connection)
 			databaseId := notionapi.DatabaseID(connection.NotionDatabase.ID)
 			items, _ := auth.NotionClient.Database.Query(context.Background(), databaseId, nil)
 			notion.CreateProp(*connection.NotionDatabase, keys.TASK_ID_KEY, "rich_text")
@@ -63,4 +64,24 @@ func checkConnection(connection models.Connection, force bool) (bool, error) {
 	googleTime = googleTime.Add(-time.Duration(googleTime.Second()) * time.Second)
 	notionTime := connection.NotionDatabase.LastEditedTime
 	return notionTime.Equal(googleTime), nil
+}
+
+func checkTasksArchivedOnNotion(conn models.Connection) {
+	pages, _ := auth.NotionClient.Database.Query(context.Background(), notionapi.DatabaseID(conn.NotionDatabase.ID), nil)
+	tasks, _ := auth.TasksService.Tasks.List(conn.TasksList.Id).Do()
+	tasksId := make([]string, len(tasks.Items))
+	for i, task := range tasks.Items {
+		tasksId[i] = task.Id
+	}
+	for _, page := range pages.Results {
+		taskId, _ := notion.GetProp(page, keys.TASK_ID_KEY)
+		if taskId != "" {
+			for i, id := range tasksId {
+				if id == taskId {
+					tasksId = append(tasksId[:i], tasksId[i+1:]...)
+					break
+				}
+			}
+		}
+	}
 }
