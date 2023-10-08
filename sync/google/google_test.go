@@ -14,15 +14,18 @@ var connection models.Connection = test.CreateMockConnection()
 
 func TestCreateNewTask(t *testing.T) {
 	conn, task := createMockPage()
-	newTask := CreateNewTask(conn)
-	if newTask.Title != task.Title {
-		t.Errorf("Expected title to be %v, got %v", task.Title, newTask.Title)
+	newConn, err := New(conn)
+	if err != nil {
+		t.Error(err)
 	}
-	if newTask.Due != task.Due {
-		t.Errorf("Expected due to be %v, got %v", task.Due, newTask.Due)
+	if newConn.Task.Title != task.Title {
+		t.Errorf("Expected title to be %v, got %v", task.Title, newConn.Task.Title)
+	}
+	if newConn.Task.Due != task.Due {
+		t.Errorf("Expected due to be %v, got %v", task.Due, newConn.Task.Due)
 	}
 	t.Cleanup(func() {
-		err := auth.TasksService.Tasks.Delete(connection.TasksList.Id, newTask.Id).Do()
+		err := auth.TasksService.Tasks.Delete(connection.TasksList.Id, newConn.Task.Id).Do()
 		if err != nil {
 			t.Error(err)
 		}
@@ -42,11 +45,10 @@ func createMockPage() (models.ConnectedTask, *tasks.Task) {
 		Connection: &connection,
 	}
 	new.Due = "2021-01-01T00:00:00.000Z"
-	page, err := notion.New(connectedTask)
+	connectedTask, err := notion.New(connectedTask)
 	if err != nil {
 		panic(err)
 	}
-	connectedTask.Notion = page
 	connectedTask.Task = nil
 	return connectedTask, new
 }

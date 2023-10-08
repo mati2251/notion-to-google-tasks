@@ -28,7 +28,7 @@ func ForceSync() {
 		for _, item := range items.Results {
 			tasksId := notion.GetStringValueFromProperty(item.Properties[keys.TASK_ID_KEY])
 			if tasksId == "" {
-				google.CreateNewTask(models.ConnectedTask{
+				google.New(models.ConnectedTask{
 					Notion:     &item,
 					Task:       nil,
 					Connection: &connection,
@@ -43,7 +43,7 @@ func ForceSync() {
 				if err != nil {
 					notion.UpdateValueFromProp(&item, viper.GetString(keys.NOTION_STATUS_KEY), viper.GetString(keys.NOTION_DONE_STATUS_VALUE))
 				} else {
-					updateTask(connectedTask, true)
+					update(connectedTask, true)
 				}
 			}
 		}

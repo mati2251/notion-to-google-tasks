@@ -64,7 +64,7 @@ func GetPropsToString(page notionapi.Page) string {
 	return propsString
 }
 
-func Update(connectedTask models.ConnectedTask) (*notionapi.Page, error) {
+func Update(connectedTask models.ConnectedTask) (models.ConnectedTask, error) {
 	newTitle := connectedTask.Task.Title
 	newDue := connectedTask.Task.Due
 	done := connectedTask.Task.Status == "completed"
@@ -81,15 +81,16 @@ func Update(connectedTask models.ConnectedTask) (*notionapi.Page, error) {
 	}
 	page, titleErr := UpdateValueFromProp(connectedTask.Notion, viper.GetString(keys.NOTION_NAME_KEY), newTitle)
 	if titleErr != nil {
-		return page, errors.Join(err, titleErr)
+		return connectedTask, errors.Join(err, titleErr)
 	}
 	if err != nil {
-		return page, errors.Join(err, errors.New("error updating notion page"))
+		return connectedTask, errors.Join(err, errors.New("error updating notion page"))
 	}
-	return page, nil
+	connectedTask.Notion = page
+	return connectedTask, nil
 }
 
-func New(connectedTask models.ConnectedTask) (*notionapi.Page, error) {
+func New(connectedTask models.ConnectedTask) (models.ConnectedTask, error) {
 	newTitle := connectedTask.Task.Title
 	newDue, _ := time.Parse(time.RFC3339, connectedTask.Task.Due)
 	newDueNotion := notionapi.Date(newDue)
@@ -115,7 +116,8 @@ func New(connectedTask models.ConnectedTask) (*notionapi.Page, error) {
 		},
 	})
 	if err != nil {
-		return nil, errors.Join(err, errors.New("error creating notion tuple"))
+		return connectedTask, errors.Join(err, errors.New("error creating notion tuple"))
 	}
-	return page, nil
+	connectedTask.Notion = page
+	return connectedTask, nil
 }

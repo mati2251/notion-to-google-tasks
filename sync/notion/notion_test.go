@@ -54,8 +54,8 @@ func TestNewGetProp(t *testing.T) {
 		Notion:     nil,
 		Connection: &connection,
 	}
-	page, err := New(conn)
-	conn.Notion = page
+	conn, err := New(conn)
+	page := conn.Notion
 	if err != nil {
 		t.Error(err)
 	}
@@ -72,7 +72,8 @@ func TestNewGetProp(t *testing.T) {
 	conn.Task.Title = "newTitle"
 	conn.Task.Due = "2021-01-02T00:00:00Z"
 	conn.Task.Status = "completed"
-	page, err = Update(conn)
+	conn, err = Update(conn)
+	page = conn.Notion
 	if err != nil {
 		t.Error(err)
 	}

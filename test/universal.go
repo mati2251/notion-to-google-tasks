@@ -48,10 +48,3 @@ func CreateMockConnection() models.Connection {
 		NotionDatabase: newDb,
 	}
 }
-
-func CleanUpMock(conn models.Connection) {
-	err := auth.TasksService.Tasklists.Delete(conn.TasksList.Id).Do()
-	if err != nil {
-		panic(err)
-	}
-}

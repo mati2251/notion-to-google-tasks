@@ -3,7 +3,6 @@ package google
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/jomei/notionapi"
@@ -15,10 +14,10 @@ import (
 	"google.golang.org/api/tasks/v1"
 )
 
-func CreateNewTask(connectedTask models.ConnectedTask) *tasks.Task {
+func New(connectedTask models.ConnectedTask) (models.ConnectedTask, error) {
 	title, err := notion.GetProp(*connectedTask.Notion, keys.NOTION_NAME_KEY)
 	if err != nil {
-		log.Fatalf("Error getting name from notion page: %v", err)
+		return connectedTask, errors.Join(err, errors.New("error getting name from notion page"))
 	}
 	notes := createNotes(*connectedTask.Notion)
 	due, _ := notion.GetProp(*connectedTask.Notion, keys.NOTION_DEADLINE_KEY)
@@ -30,13 +29,15 @@ func CreateNewTask(connectedTask models.ConnectedTask) *tasks.Task {
 	task, err := auth.TasksService.Tasks.Insert(connectedTask.Connection.TasksList.Id, newTask).Do()
 	connectedTask.Task = task
 	if err != nil {
-		log.Fatalf("Error creating task: %v", err)
+		return connectedTask, errors.Join(err, errors.New("error creating task"))
 	}
-	_, err = notion.UpdateValueFromProp(connectedTask.Notion, keys.TASK_ID_KEY, connectedTask.Task.Id)
+	page, err := notion.UpdateValueFromProp(connectedTask.Notion, keys.TASK_ID_KEY, connectedTask.Task.Id)
 	if err != nil {
-		log.Fatalf("Error updating notion page: %v", err)
+		return connectedTask, errors.Join(err, errors.New("error updating notion page"))
 	}
-	return task
+	connectedTask.Task = task
+	connectedTask.Notion = page
+	return connectedTask, nil
 }
 
 func createNotes(tuple notionapi.Page) string {
@@ -47,10 +48,10 @@ func createNotes(tuple notionapi.Page) string {
 	return notes
 }
 
-func Update(connectedTask models.ConnectedTask) error {
+func Update(connectedTask models.ConnectedTask) (models.ConnectedTask, error) {
 	title, err := notion.GetProp(*connectedTask.Notion, keys.NOTION_NAME_KEY)
 	if err != nil {
-		return errors.Join(err, errors.New("error getting nontio page"))
+		return connectedTask, errors.Join(err, errors.New("error getting nontio page"))
 	}
 	notes := strings.Split(connectedTask.Task.Notes, keys.BREAK_LINE)
 	if len(notes) > 1 {
@@ -59,11 +60,11 @@ func Update(connectedTask models.ConnectedTask) error {
 	notes = append(notes, createNotes(*connectedTask.Notion))
 	due, err := notion.GetProp(*connectedTask.Notion, keys.NOTION_DEADLINE_KEY)
 	if err != nil {
-		return errors.Join(err, errors.New("error getting deadline from notion page"))
+		return connectedTask, errors.Join(err, errors.New("error getting deadline from notion page"))
 	}
 	done, err := notion.GetProp(*connectedTask.Notion, keys.NOTION_STATUS_KEY)
 	if err != nil {
-		return errors.Join(err, errors.New("error getting status from notion page"))
+		return connectedTask, errors.Join(err, errors.New("error getting status from notion page"))
 	}
 	if done == viper.GetString(keys.NOTION_DONE_STATUS_VALUE) {
 		connectedTask.Task.Status = "completed"
@@ -72,9 +73,10 @@ func Update(connectedTask models.ConnectedTask) error {
 	newTask.Title = title
 	newTask.Notes = strings.Join(notes, "")
 	newTask.Due = due
-	_, err = auth.TasksService.Tasks.Update(connectedTask.Connection.TasksList.Id, connectedTask.Task.Id, newTask).Do()
+	task, err := auth.TasksService.Tasks.Update(connectedTask.Connection.TasksList.Id, connectedTask.Task.Id, newTask).Do()
+	connectedTask.Task = task
 	if err != nil {
-		return errors.Join(err, errors.New("error updating task"))
+		return connectedTask, errors.Join(err, errors.New("error updating task"))
 	}
-	return nil
+	return connectedTask, nil
 }

@@ -8,15 +8,16 @@ import (
 	"github.com/mati2251/notion-to-google-tasks/sync/notion"
 )
 
-func updateTask(connectedTask models.ConnectedTask, force bool) error {
+func update(connectedTask models.ConnectedTask, force bool) (models.ConnectedTask, error) {
 	googleTime, err := time.Parse(time.RFC3339, connectedTask.Task.Updated)
+	googleTime = googleTime.Add(-time.Duration(googleTime.Second()) * time.Second)
 	if err != nil {
-		return err
+		return connectedTask, err
 	}
 	if connectedTask.Notion.LastEditedTime.Before(googleTime) {
-		notion.Update(connectedTask)
+		return notion.Update(connectedTask)
 	} else if connectedTask.Notion.LastEditedTime.After(googleTime) || force {
-		google.Update(connectedTask)
+		return google.Update(connectedTask)
 	}
-	return nil
+	return connectedTask, nil
 }
