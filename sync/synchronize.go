@@ -20,18 +20,19 @@ import (
 func Sync(force bool) {
 	connections := connections.GetConnections()
 	for _, connection := range connections {
-		check, err := checkConnection(connection, force)
+		check, err := checkIsSyncRequired(connection, force)
 		if err != nil {
 			log.Fatalf("Error checking connection: %v", err)
 		}
 		if check {
 			itemsId := syncFromNotion(connection, force)
 			syncFromGoogle(connection, force, itemsId)
+			SetLastTimeSync()
 		}
 	}
 }
 
-func checkConnection(connection models.Connection, force bool) (bool, error) {
+func checkIsSyncRequired(connection models.Connection, force bool) (bool, error) {
 	if force {
 		return true, nil
 	}
@@ -41,7 +42,8 @@ func checkConnection(connection models.Connection, force bool) (bool, error) {
 	}
 	googleTime = googleTime.Add(-time.Duration(googleTime.Second()) * time.Second)
 	notionTime := connection.NotionDatabase.LastEditedTime
-	return notionTime.Equal(googleTime), nil
+	lastTimeSync := GetLastTimeSync()
+	return lastTimeSync.Before(googleTime) || lastTimeSync.Before(notionTime), nil
 }
 
 func syncFromNotion(connection models.Connection, force bool) []string {
