@@ -54,6 +54,8 @@ var configCmd = &cobra.Command{
 		}
 		if slices.Contains(specifics, "first-scan") {
 		}
+		viper.WriteConfig()
+		viper.SafeWriteConfig()
 	},
 }
 

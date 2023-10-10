@@ -54,7 +54,7 @@ func setDefaults() {
 
 func getClientIdAndSecret() {
 	prompt := promptui.Prompt{
-		Label: "Client ID",
+		Label: "Google Client ID",
 	}
 
 	clientId, err := prompt.Run()
@@ -65,7 +65,7 @@ func getClientIdAndSecret() {
 	}
 
 	prompt = promptui.Prompt{
-		Label: "Client Secret",
+		Label: "Google Client Secret",
 	}
 
 	clientSecret, err := prompt.Run()

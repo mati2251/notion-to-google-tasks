@@ -28,7 +28,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.notion-to-google-tasks.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/notion-to-google-tasks/config.yaml)")
 
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
@@ -39,10 +39,13 @@ func initConfig() {
 	} else {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
-
-		viper.AddConfigPath(home)
+		configPath := home + "/.config/notion-to-google-tasks"
+		if _, err := os.Stat(configPath); os.IsNotExist(err) {
+			os.MkdirAll(configPath, 0755)
+		}
+		viper.AddConfigPath(configPath)
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".notion-to-google-tasks")
+		viper.SetConfigName("config")
 	}
 
 	viper.AutomaticEnv()
