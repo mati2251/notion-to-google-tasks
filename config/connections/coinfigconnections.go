@@ -37,7 +37,7 @@ func newConnections() {
 			log.Fatalf("Prompt failed %v\n", err)
 			return
 		}
-		addNewConnectionToConfig(string(database.ID), list.Id)
+		addNewConnectionToConfig(list.Id, string(database.ID))
 	}
 }
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/mati2251/notion-to-google-tasks/keys"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -39,7 +40,7 @@ func initConfig() {
 	} else {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
-		configPath := home + "/.config/notion-to-google-tasks"
+		configPath := home + keys.FILES_PATH
 		if _, err := os.Stat(configPath); os.IsNotExist(err) {
 			os.MkdirAll(configPath, 0755)
 		}
