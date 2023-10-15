@@ -5,15 +5,25 @@ import (
 )
 
 type ConnectedTask struct {
-	TasksId      string `gorm:"primaryKey;uniqueIndex"`
+	TasksId      string
 	TaskUpdate   *time.Time
-	NotionId     string `gorm:"primaryKey;uniqueIndex"`
+	NotionId     string
 	NotionUpdate *time.Time
-	Connection   Connection `gorm:"foreignKey:NotionDatabasId;references:NotionDatabasId"`
-	TasksListId  string
+	Connection   Connection
 }
 
 type Connection struct {
 	NotionDatabasId string
 	TasksListId     string
+}
+
+type TaskDetails struct {
+	Title   string
+	DueDate *time.Time
+	Done    bool
+	Notes   string
+}
+
+type Service interface {
+	Inserts(ids []string, connectionId string) error
 }

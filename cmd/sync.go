@@ -12,7 +12,8 @@ var syncCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		connections := connections.GetConnections()
-		sync.Sync(connections)
+		err := sync.Sync(connections)
+		cobra.CheckErr(err)
 	},
 }
 
