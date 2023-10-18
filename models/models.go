@@ -25,8 +25,7 @@ type TaskDetails struct {
 }
 
 type Service interface {
-	Inserts(ids []string, connectionId string) error
 	Insert(connectionId string, details *TaskDetails) (string, *time.Time, error)
 	Update(connectionId string, id string, details *TaskDetails) (*time.Time, error)
-	GetTaskDetails(connectionId string, id string) (*TaskDetails, error)
+	GetTaskDetails(connectionId string, id string) (*TaskDetails, *time.Time, error)
 }

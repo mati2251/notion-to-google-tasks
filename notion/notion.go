@@ -3,32 +3,81 @@ package notion
 import (
 	"context"
 	"errors"
-	"slices"
+	"time"
 
 	"github.com/jomei/notionapi"
 	"github.com/mati2251/notion-to-google-tasks/config/auth"
 	"github.com/mati2251/notion-to-google-tasks/keys"
+	"github.com/mati2251/notion-to-google-tasks/models"
 	"github.com/spf13/viper"
 )
 
 type NotionService struct{}
 
-var Service NotionService
+var Service models.Service = NotionService{}
 
-func (_ NotionService) Inserts(ids []string, connectionId string) error {
-	notionId := notionapi.DatabaseID(viper.GetString(keys.CONNECTIONS))
-	items, err := auth.NotionClient.Database.Query(context.Background(), notionId, &notionapi.DatabaseQueryRequest{})
+func (NotionService) Insert(connectionId string, details *models.TaskDetails) (string, *time.Time, error) {
+	page, err := auth.NotionClient.Page.Create(context.Background(), &notionapi.PageCreateRequest{
+		Parent: notionapi.Parent{
+			DatabaseID: notionapi.DatabaseID(viper.GetString(keys.CONNECTIONS)),
+			Type:       "database_id",
+		},
+		Properties: notionapi.Properties{
+			viper.GetString(keys.NOTION_NAME_KEY): notionapi.TitleProperty{
+				Title: []notionapi.RichText{NewRichText(details.Title)},
+			},
+			viper.GetString(keys.NOTION_DEADLINE_KEY): NewDateProperty(*details.DueDate),
+		},
+	})
 	if err != nil {
-		return errors.Join(err, errors.New("error while getting database"))
+		return "", nil, err
 	}
-	for _, page := range items.Results {
-		if !slices.Contains(ids, page.ID.String()) {
-
-		}
-	}
-	return nil
+	return page.ID.String(), &page.LastEditedTime, nil
 }
 
-func (_ NotionService) Insert(taskId string, connectionId string) error {
-	return nil
+func (NotionService) GetTaskDetails(connectionId string, id string) (*models.TaskDetails, *time.Time, error) {
+	page, err := auth.NotionClient.Page.Get(context.Background(), notionapi.PageID(id))
+	if err != nil {
+		return nil, nil, errors.Join(err, errors.New("error while getting page"))
+	}
+	title := GetStringValueFromProperty(page.Properties[viper.GetString(keys.NOTION_NAME_KEY)])
+	due_date_str := GetStringValueFromProperty(page.Properties[viper.GetString(keys.NOTION_DEADLINE_KEY)])
+	due_date, err := time.Parse(time.RFC3339, due_date_str)
+	done := GetStringValueFromProperty(page.Properties[viper.GetString(keys.NOTION_STATUS_KEY)]) == viper.GetString(keys.NOTION_DONE_STATUS_VALUE)
+	if err != nil {
+		return nil, nil, errors.Join(err, errors.New("error parsing due date"))
+	}
+	notes := createNotes(page.Properties)
+	return &models.TaskDetails{
+		Title:   title,
+		DueDate: &due_date,
+		Done:    done,
+		Notes:   notes,
+	}, &page.LastEditedTime, nil
+}
+
+func createNotes(properties notionapi.Properties) string {
+	notes := keys.BREAK_LINE
+	for key, value := range properties {
+		if key != viper.GetString(keys.NOTION_NAME_KEY) && key != viper.GetString(keys.NOTION_DEADLINE_KEY) {
+			notes += key + ": " + GetStringValueFromProperty(value)
+		}
+	}
+	return notes
+}
+
+func (NotionService) Update(connectionId string, id string, details *models.TaskDetails) (*time.Time, error) {
+	page, err := auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(id), &notionapi.PageUpdateRequest{
+		Properties: notionapi.Properties{
+			viper.GetString(keys.NOTION_NAME_KEY):     NewRichTextProperty(details.Title),
+			viper.GetString(keys.NOTION_DEADLINE_KEY): NewDateProperty(*details.DueDate),
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	if details.Done {
+		UpdateValueFromProp(page, viper.GetString(keys.NOTION_STATUS_KEY), viper.GetString(keys.NOTION_DONE_STATUS_VALUE))
+	}
+	return &page.LastEditedTime, nil
 }

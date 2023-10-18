@@ -61,7 +61,7 @@ func GetStringValueFromProperty(property notionapi.Property) string {
 		if property.(*notionapi.DateProperty).Date == nil {
 			return ""
 		}
-		return property.(*notionapi.DateProperty).Date.Start.String()
+		return property.(*notionapi.DateProperty).Date.End.String()
 	case notionapi.PropertyTypeFormula:
 		return property.(*notionapi.FormulaProperty).Formula.String
 	case notionapi.PropertyTypeRelation:
@@ -216,6 +216,15 @@ func NewRichText(content string) notionapi.RichText {
 		Type: "text",
 		Text: &notionapi.Text{
 			Content: content,
+		},
+	}
+}
+
+func NewDateProperty(date time.Time) notionapi.DateProperty {
+	notionDate := notionapi.Date(date)
+	return notionapi.DateProperty{
+		Date: &notionapi.DateObject{
+			End: &notionDate,
 		},
 	}
 }
