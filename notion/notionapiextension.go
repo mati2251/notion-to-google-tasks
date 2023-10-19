@@ -17,7 +17,7 @@ func GetStringValueFromProperty(property notionapi.Property) string {
 		richText := property.(*notionapi.RichTextProperty).RichText
 		var value string
 		for index, richTextItem := range richText {
-			value += richTextItem.PlainText
+			value += richTextItem.Text.Content
 			if index != len(richText)-1 {
 				value += " "
 			}
@@ -27,7 +27,7 @@ func GetStringValueFromProperty(property notionapi.Property) string {
 		textProperty := property.(*notionapi.TextProperty).Text
 		var value string
 		for index, item := range textProperty {
-			value += item.PlainText
+			value += item.Text.Content
 			if index != len(textProperty)-1 {
 				value += " "
 			}
@@ -37,7 +37,7 @@ func GetStringValueFromProperty(property notionapi.Property) string {
 		textProperty := property.(*notionapi.TitleProperty).Title
 		var value string
 		for index, item := range textProperty {
-			value += item.PlainText
+			value += item.Text.Content
 			if index != len(textProperty)-1 {
 				value += " "
 			}
@@ -61,6 +61,12 @@ func GetStringValueFromProperty(property notionapi.Property) string {
 		if property.(*notionapi.DateProperty).Date == nil {
 			return ""
 		}
+		if property.(*notionapi.DateProperty).Date.End == nil {
+			if property.(*notionapi.DateProperty).Date.Start == nil {
+				return ""
+			}
+			return property.(*notionapi.DateProperty).Date.Start.String()
+		}
 		return property.(*notionapi.DateProperty).Date.End.String()
 	case notionapi.PropertyTypeFormula:
 		return property.(*notionapi.FormulaProperty).Formula.String
@@ -68,7 +74,7 @@ func GetStringValueFromProperty(property notionapi.Property) string {
 		relation := property.(*notionapi.RelationProperty).Relation
 		var value string
 		for index, item := range relation {
-			value += item.ID.String() + " "
+			value += item.ID.String()
 			if index != len(relation)-1 {
 				value += " "
 			}
@@ -81,7 +87,7 @@ func GetStringValueFromProperty(property notionapi.Property) string {
 		people := property.(*notionapi.PeopleProperty).People
 		var value string
 		for index, item := range people {
-			value += item.Name + " "
+			value += item.Name
 			if index != len(people)-1 {
 				value += " "
 			}
@@ -91,7 +97,7 @@ func GetStringValueFromProperty(property notionapi.Property) string {
 		files := property.(*notionapi.FilesProperty).Files
 		var value string
 		for index, item := range files {
-			value += item.Name + " "
+			value += item.Name
 			if index != len(files)-1 {
 				value += " "
 			}

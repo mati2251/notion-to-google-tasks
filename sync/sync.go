@@ -6,12 +6,15 @@ import (
 )
 
 func Sync(connections []models.Connection) error {
+	err := db.OpenFile()
+	if err != nil {
+		return err
+	}
 	for _, connection := range connections {
-		err := db.OpenFile()
+		ids, err := updates()
 		if err != nil {
 			return err
 		}
-		ids, err := updates()
 		err = inserts(ids, connection.TasksListId)
 		if err != nil {
 			return err
