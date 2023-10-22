@@ -206,3 +206,117 @@ func TestGetStringValueFromProperty(t *testing.T) {
 		})
 	}
 }
+
+func TestUpdateValueFromProp(t *testing.T) {
+	now := time.Now()
+	richText := []notionapi.RichText{
+		{
+			Type: "rich_text",
+			Text: &notionapi.Text{
+				Content: "Hello",
+			},
+		},
+		{
+			Type: "rich_text",
+			Text: &notionapi.Text{
+				Content: "world!",
+			},
+		},
+	}
+	richTextProperty := &notionapi.RichTextProperty{
+		RichText: richText,
+		Type:     "rich_text",
+	}
+	textProperty := &notionapi.TextProperty{
+		Text: richText,
+		Type: "text",
+	}
+	titleProperty := &notionapi.TitleProperty{
+		Title: richText,
+		Type:  "title",
+	}
+	numberProperty := &notionapi.NumberProperty{
+		Number: 42,
+		Type:   "number",
+	}
+	selectProperty := &notionapi.SelectProperty{
+		Select: notionapi.Option{
+			Name: "Option 1",
+		},
+		Type: "select",
+	}
+	dateProperty := NewDateProperty(now)
+	checkboxProperty := &notionapi.CheckboxProperty{
+		Checkbox: true,
+		Type:     "checkbox",
+	}
+	urlProperty := &notionapi.URLProperty{
+		URL:  "https://example.com",
+		Type: "url",
+	}
+
+	tests := []struct {
+		name         string
+		property     notionapi.Property
+		newValue     string
+		expectedProp notionapi.Property
+	}{
+		{
+			name:         "RichTextProperty",
+			property:     richTextProperty,
+			newValue:     "New value",
+			expectedProp: &notionapi.RichTextProperty{RichText: []notionapi.RichText{{Type: "text", Text: &notionapi.Text{Content: "New value"}}}, Type: "rich_text"},
+		},
+		{
+			name:         "TextProperty",
+			property:     textProperty,
+			newValue:     "New value",
+			expectedProp: &notionapi.TextProperty{Text: []notionapi.RichText{{Type: "text", Text: &notionapi.Text{Content: "New value"}}}, Type: "text"},
+		},
+		{
+			name:         "TitleProperty",
+			property:     titleProperty,
+			newValue:     "New value",
+			expectedProp: &notionapi.TitleProperty{Title: []notionapi.RichText{{Type: "text", Text: &notionapi.Text{Content: "New value"}}}, Type: "title"},
+		},
+		{
+			name:         "NumberProperty",
+			property:     numberProperty,
+			newValue:     "42.5",
+			expectedProp: &notionapi.NumberProperty{Number: 42.5, Type: "number"},
+		},
+		{
+			name:         "SelectProperty",
+			property:     selectProperty,
+			newValue:     "New value",
+			expectedProp: &notionapi.SelectProperty{Select: notionapi.Option{Name: "New value", ID: "", Color: ""}, Type: "select"},
+		},
+		{
+			name:         "DateProperty",
+			property:     &dateProperty,
+			newValue:     now.Format(time.RFC3339),
+			expectedProp: NewDateProperty(now),
+		},
+		{
+			name:         "CheckboxProperty",
+			property:     checkboxProperty,
+			newValue:     "false",
+			expectedProp: &notionapi.CheckboxProperty{Checkbox: false, Type: "checkbox"},
+		},
+		{
+			name:         "URLProperty",
+			property:     urlProperty,
+			newValue:     "https://newexample.com",
+			expectedProp: &notionapi.URLProperty{URL: "https://newexample.com", Type: "url"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			prop, _ := UpdateValueFromProp(tt.property, tt.newValue)
+			if GetStringValueFromProperty(prop) != GetStringValueFromProperty(tt.property) {
+				t.Errorf("UpdateValueFromProp() property = %v, expected %v, type %v", prop, tt.expectedProp, tt.property.GetType())
+			}
+		})
+	}
+}

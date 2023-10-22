@@ -77,7 +77,17 @@ func (NotionService) Update(connectionId string, id string, details *models.Task
 		return nil, err
 	}
 	if details.Done {
-		UpdateValueFromProp(page, viper.GetString(keys.NOTION_STATUS_KEY), viper.GetString(keys.NOTION_DONE_STATUS_VALUE))
+		prop := page.Properties[viper.GetString(keys.NOTION_STATUS_KEY)]
+		newProp, err := UpdateValueFromProp(prop, viper.GetString(keys.NOTION_DONE_STATUS_VALUE))
+		if err != nil {
+			return nil, err
+		}
+		page, err = auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(id), &notionapi.PageUpdateRequest{
+			Properties: notionapi.Properties{
+				viper.GetString(keys.NOTION_STATUS_KEY): newProp,
+			},
+		})
+		return &page.LastEditedTime, err
 	}
 	return &page.LastEditedTime, nil
 }

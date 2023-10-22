@@ -1,14 +1,12 @@
 package notion
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/jomei/notionapi"
-	"github.com/mati2251/notion-to-google-tasks/config/auth"
 )
 
 func GetStringValueFromProperty(property notionapi.Property) string {
@@ -130,11 +128,7 @@ func GetStringValueFromProperty(property notionapi.Property) string {
 	}
 }
 
-func UpdateValueFromProp(page *notionapi.Page, key string, newValue string) (*notionapi.Page, error) {
-	property := page.Properties[key]
-	if property == nil {
-		return nil, errors.New("property not found")
-	}
+func UpdateValueFromProp(property notionapi.Property, newValue string) (notionapi.Property, error) {
 	var obj notionapi.Property = property
 	switch property.GetType() {
 	case notionapi.PropertyTypeRichText:
@@ -209,12 +203,7 @@ func UpdateValueFromProp(page *notionapi.Page, key string, newValue string) (*no
 	default:
 		return nil, errors.New("property type not supported")
 	}
-	page, err := auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(page.ID), &notionapi.PageUpdateRequest{
-		Properties: notionapi.Properties{
-			key: obj,
-		},
-	})
-	return page, err
+	return obj, nil
 }
 
 func NewRichText(content string) notionapi.RichText {
@@ -229,6 +218,7 @@ func NewRichText(content string) notionapi.RichText {
 func NewDateProperty(date time.Time) notionapi.DateProperty {
 	notionDate := notionapi.Date(date)
 	return notionapi.DateProperty{
+		Type: "date",
 		Date: &notionapi.DateObject{
 			End: &notionDate,
 		},
