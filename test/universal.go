@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"os"
+	"time"
 
 	"github.com/jomei/notionapi"
 	"github.com/mati2251/notion-to-google-tasks/config/auth"
@@ -22,6 +23,7 @@ func InitViper() {
 	viper.AddConfigPath(configPath)
 	viper.SetConfigType("yaml")
 	viper.SetConfigName("config")
+	viper.ReadInConfig()
 }
 
 func CreateMockConnection() models.Connection {
@@ -49,5 +51,15 @@ func CreateMockConnection() models.Connection {
 	return models.Connection{
 		TasksListId:     taskList.Id,
 		NotionDatabasId: newDb.ID.String(),
+	}
+}
+
+func CreateDetails() models.TaskDetails {
+	time := time.Now().Round(time.Minute)
+	return models.TaskDetails{
+		Title:   "Test task",
+		Notes:   "Test notes",
+		Done:    false,
+		DueDate: &time,
 	}
 }

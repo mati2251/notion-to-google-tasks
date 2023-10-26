@@ -84,7 +84,7 @@ func getTasksList(eventuallyNewName string) (*tasks.TaskList, error) {
 }
 
 func addNewConnectionToConfig(databaseId string, listId string) {
-	viper.Set(fmt.Sprintf("connections.%s", databaseId), listId)
+	viper.Set(fmt.Sprintf("connections.%s", listId), databaseId)
 	viper.WriteConfig()
 }
 

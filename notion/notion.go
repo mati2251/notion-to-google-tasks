@@ -19,7 +19,7 @@ var Service models.Service = NotionService{}
 func (NotionService) Insert(connectionId string, details *models.TaskDetails) (string, *time.Time, error) {
 	page, err := auth.NotionClient.Page.Create(context.Background(), &notionapi.PageCreateRequest{
 		Parent: notionapi.Parent{
-			DatabaseID: notionapi.DatabaseID(viper.GetString(keys.CONNECTIONS)),
+			DatabaseID: notionapi.DatabaseID(viper.GetString(keys.CONNECTIONS + "." + connectionId)),
 			Type:       "database_id",
 		},
 		Properties: notionapi.Properties{

@@ -220,7 +220,7 @@ func NewDateProperty(date time.Time) notionapi.DateProperty {
 	return notionapi.DateProperty{
 		Type: "date",
 		Date: &notionapi.DateObject{
-			End: &notionDate,
+			Start: &notionDate,
 		},
 	}
 }
