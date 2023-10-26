@@ -36,4 +36,14 @@ func TestInsert(t *testing.T) {
 	if page.LastEditedTime != *updated {
 		t.Error("Last edited time is not correct")
 	}
+	t.Cleanup(func() {
+		print("test")
+		_, err := auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(id), &notionapi.PageUpdateRequest{
+			Archived:   true,
+			Properties: notionapi.Properties{},
+		})
+		if err != nil {
+			t.Error(err)
+		}
+	})
 }
