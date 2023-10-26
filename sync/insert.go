@@ -3,7 +3,6 @@ package sync
 import (
 	"context"
 	"errors"
-	"slices"
 
 	"github.com/jomei/notionapi"
 	"github.com/mati2251/notion-to-google-tasks/config/auth"
@@ -13,6 +12,7 @@ import (
 	"github.com/mati2251/notion-to-google-tasks/models"
 	"github.com/mati2251/notion-to-google-tasks/notion"
 	"github.com/spf13/viper"
+	"golang.org/x/exp/slices"
 )
 
 func inserts(ids []string, connectionId string) error {
@@ -52,7 +52,6 @@ func googleInserts(ids []string, connectionId string) error {
 	}
 	return nil
 }
-
 
 func notionInserts(ids []string, connectionId string) error {
 	notionId := notionapi.DatabaseID(viper.GetString(keys.CONNECTIONS))
