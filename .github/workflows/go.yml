@@ -26,11 +26,11 @@ jobs:
         sed -i "s/${GOOGLE_CLIENT_ID}/${{ secrets.GOOGLE_CLIENT_ID }}/g" test.yml
         sed -i "s/${GOOGLE_TEST_LIST_ID}/${{ secrets.GOOGLE_TEST_LIST_ID }}/g" test.yml
         sed -i "s/${GOOGLE_REFRESH_TOKEN}/${{ secrets.GOOGLE_REFRESH_TOKEN }}/g" test.yml
-        sed -i "s/${NOTION_STATUS}/${{ variables.NOTION_STATUS }}/g" test.yml
-        sed -i "s/${NOTION_DEADLINE}/${{ variables.NOTION_DEADLINE }}/g" test.yml
+        sed -i "s/${NOTION_STATUS}/${{ env.NOTION_STATUS }}/g" test.yml
+        sed -i "s/${NOTION_DEADLINE}/${{ env.NOTION_DEADLINE }}/g" test.yml
         sed -i "s/${NOTION_TEST_DB_ID}/${{ secrets.NOTION_TEST_DB_ID }}/g" test.yml
-        sed -i "s/${NOTION_STATUS_DONE_VALUE}/${{ variables.NOTION_STATUS_DONE_VALUE }}/g" test.yml
-        sed -i "s/${NOTION_NAME}/${{ variables.NOTION_NAME }}/g" test.yml
+        sed -i "s/${NOTION_STATUS_DONE_VALUE}/${{ env.NOTION_STATUS_DONE_VALUE }}/g" test.yml
+        sed -i "s/${NOTION_NAME}/${{ env.NOTION_NAME }}/g" test.yml
         sed -i "s/${NOTION_TOKEN}/${{ secrets.NOTION_TOKEN }}/g" test.yml
     - name: Build
       run: go build -v ./...
