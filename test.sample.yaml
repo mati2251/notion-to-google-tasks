@@ -1,0 +1,18 @@
+google:
+  access_token: ${GOOLGE_ACCESS_TOKEN}
+  client_secret: ${GOOGLE_CLEINT_SECRET}
+  auth_uri: https://accounts.google.com/o/oauth2/auth
+  token_type: Bearer
+  client_id: ${GOOGLE_CLIENT_ID}
+  test_list: ${GOOGLE_TEST_LIST_ID}
+  refresh_token: ${GOOGLE_REFRESH_TOKEN}
+  auth_provider_x509_cert_url: https://www.googleapis.com/oauth2/v1/certs
+  redirect_uris: http://localhost
+  token_uri: https://oauth2.googleapis.com/token
+notion:
+  status: ${NOTION_STATUS}
+  deadline: ${NOTION_DEADLINE}
+  test_db: ${NOTION_TEST_DB_ID}
+  done_status_value: ${NOTION_STATUS_DONE_VALUE}
+  name: ${NOTION_NAME}
+  token: ${NOTION_TOKEN}

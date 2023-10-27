@@ -159,7 +159,7 @@ func TestGetStringValueFromProperty(t *testing.T) {
 		{
 			name:     "DateProperty",
 			property: dateProperty,
-			want:     time.Now().Format(time.RFC3339),
+			want:     now.Format(time.RFC3339),
 		},
 		{
 			name:     "FormulaProperty",

@@ -2,28 +2,26 @@ package test
 
 import (
 	"context"
-	"os"
+	"path"
+	"runtime"
 	"time"
 
 	"github.com/jomei/notionapi"
 	"github.com/mati2251/notion-to-google-tasks/config/auth"
-	"github.com/mati2251/notion-to-google-tasks/keys"
 	"github.com/mati2251/notion-to-google-tasks/models"
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 func InitViper() {
-	home, err := os.UserHomeDir()
-	cobra.CheckErr(err)
-	configPath := home + keys.FILES_PATH
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		os.MkdirAll(configPath, 0755)
-	}
-	viper.AddConfigPath(configPath)
+	_, b, _, _ := runtime.Caller(0)
+	path := path.Join(path.Dir(path.Dir(b)))
+	viper.AddConfigPath(path)
+	viper.SetConfigName("test")
 	viper.SetConfigType("yaml")
-	viper.SetConfigName("config")
-	viper.ReadInConfig()
+	error := viper.ReadInConfig()
+	if error != nil {
+		panic(error)
+	}
 }
 
 func CreateMockConnection() models.Connection {
