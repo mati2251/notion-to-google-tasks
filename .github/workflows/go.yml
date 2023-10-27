@@ -21,17 +21,17 @@ jobs:
     - name: Create test file config
       run: |
         cp test.sample.yaml test.yaml
-        sed -i "s/${GOOGLE_ACCESS_TOKEN}/${{ secrets.GOOGLE_ACCESS_TOKEN }}/g" test.yaml
-        sed -i "s/${GOOGLE_CLEINT_SECRET}/${{ secrets.GOOGLE_CLEINT_SECRET }}/g" test.yaml
-        sed -i "s/${GOOGLE_CLIENT_ID}/${{ secrets.GOOGLE_CLIENT_ID }}/g" test.yaml
-        sed -i "s/${GOOGLE_TEST_LIST_ID}/${{ secrets.GOOGLE_TEST_LIST_ID }}/g" test.yaml
-        sed -i "s/${GOOGLE_REFRESH_TOKEN}/${{ secrets.GOOGLE_REFRESH_TOKEN }}/g" test.yaml
-        sed -i "s/${NOTION_STATUS}/${{ env.NOTION_STATUS }}/g" test.yaml
-        sed -i "s/${NOTION_DEADLINE}/${{ env.NOTION_DEADLINE }}/g" test.yaml
-        sed -i "s/${NOTION_TEST_DB_ID}/${{ secrets.NOTION_TEST_DB_ID }}/g" test.yaml
-        sed -i "s/${NOTION_STATUS_DONE_VALUE}/${{ env.NOTION_STATUS_DONE_VALUE }}/g" test.yaml
-        sed -i "s/${NOTION_NAME}/${{ env.NOTION_NAME }}/g" test.yaml
-        sed -i "s/${NOTION_TOKEN}/${{ secrets.NOTION_TOKEN }}/g" test.yaml
+        sed -i "s/\${GOOGLE_ACCESS_TOKEN}/${{ secrets.GOOGLE_ACCESS_TOKEN }}/g" test.yaml
+        sed -i "s/\${GOOGLE_CLEINT_SECRET}/${{ secrets.GOOGLE_CLEINT_SECRET }}/g" test.yaml
+        sed -i "s/\${GOOGLE_CLIENT_ID}/${{ secrets.GOOGLE_CLIENT_ID }}/g" test.yaml
+        sed -i "s/\${GOOGLE_TEST_LIST_ID}/${{ secrets.GOOGLE_TEST_LIST_ID }}/g" test.yaml
+        sed -i "s/\${GOOGLE_REFRESH_TOKEN}/${{ secrets.GOOGLE_REFRESH_TOKEN }}/g" test.yaml
+        sed -i "s/\${NOTION_STATUS}/${{ env.NOTION_STATUS }}/g" test.yaml
+        sed -i "s/\${NOTION_DEADLINE}/${{ env.NOTION_DEADLINE }}/g" test.yaml
+        sed -i "s/\${NOTION_TEST_DB_ID}/${{ secrets.NOTION_TEST_DB_ID }}/g" test.yaml
+        sed -i "s/\${NOTION_STATUS_DONE_VALUE}/${{ env.NOTION_STATUS_DONE_VALUE }}/g" test.yaml
+        sed -i "s/\${NOTION_NAME}/${{ env.NOTION_NAME }}/g" test.yaml
+        sed -i "s/\${NOTION_TOKEN}/${{ secrets.NOTION_TOKEN }}/g" test.yaml
     - name: Build
       run: go build -v ./...
 
