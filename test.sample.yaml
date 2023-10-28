@@ -1,3 +1,5 @@
+connections:
+    ${GOOGLE_TEST_LIST_ID}: ${NOTION_TEST_DB_ID}
 google:
   access_token: ${GOOGLE_ACCESS_TOKEN}
   client_secret: ${GOOGLE_CLEINT_SECRET}
