@@ -1,5 +1,5 @@
 google:
-  access_token: ${GOOLGE_ACCESS_TOKEN}
+  access_token: ${GOOGLE_ACCESS_TOKEN}
   client_secret: ${GOOGLE_CLEINT_SECRET}
   auth_uri: https://accounts.google.com/o/oauth2/auth
   token_type: Bearer
