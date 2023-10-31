@@ -225,8 +225,9 @@ func NewDateProperty(date time.Time) notionapi.DateProperty {
 	}
 }
 
-func NewRichTextProperty(content string) notionapi.RichTextProperty {
-	return notionapi.RichTextProperty{
+func NewRichTextProperty(content string) *notionapi.RichTextProperty {
+	return &notionapi.RichTextProperty{
+		Type: "rich_text",
 		RichText: []notionapi.RichText{
 			NewRichText(content),
 		},

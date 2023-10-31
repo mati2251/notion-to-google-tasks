@@ -46,3 +46,45 @@ func TestInsert(t *testing.T) {
 		}
 	})
 }
+
+func TestGetTaskDetails(t *testing.T) {
+	details := test.CreateDetails()
+	pageId, _, err := Service.Insert(connection.TasksListId, &details)
+	if err != nil {
+		t.Error(err)
+	}
+	taskDetails, _, err := Service.GetTaskDetails(connection.TasksListId, pageId)
+	if err != nil {
+		t.Error(err)
+	}
+	if taskDetails.Title != details.Title {
+		t.Errorf("Title is not correct: new value %v correct value %v", taskDetails.Title, details.Title)
+	}
+	if taskDetails.DueDate.Format(time.RFC3339) != details.DueDate.Format(time.RFC3339) {
+		t.Errorf("Deadline is not correct: new value %v correct value %v", taskDetails.DueDate.Format(time.RFC3339), details.DueDate.Format(time.RFC3339))
+	}
+	if taskDetails.Done != details.Done {
+		t.Errorf("Done is not correct: new value %v correct value %v", taskDetails.Done, details.Done)
+	}
+	t.Cleanup(func() {
+		_, err := auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(pageId), &notionapi.PageUpdateRequest{
+			Archived:   true,
+			Properties: notionapi.Properties{},
+		})
+		if err != nil {
+			t.Error(err)
+		}
+	})
+}
+
+func TestCreateNotes(t *testing.T) {
+	prop := notionapi.Properties{
+		"Name1": NewRichTextProperty("Test"),
+		"Name2": NewRichTextProperty("Test2"),
+	}
+	notes := createNotes(prop)
+	notes2 := keys.BREAK_LINE + "Name1: Test\nName2: Test2\n"
+	if notes != notes2 {
+		t.Errorf("Notes are not correct: new value \n %v correct value \n %v", notes, notes2)
+	}
+}

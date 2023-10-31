@@ -60,7 +60,7 @@ func createNotes(properties notionapi.Properties) string {
 	notes := keys.BREAK_LINE
 	for key, value := range properties {
 		if key != viper.GetString(keys.NOTION_NAME_KEY) && key != viper.GetString(keys.NOTION_DEADLINE_KEY) {
-			notes += key + ": " + GetStringValueFromProperty(value)
+			notes += key + ": " + GetStringValueFromProperty(value) + "\n"
 		}
 	}
 	return notes
