@@ -67,10 +67,22 @@ func createNotes(properties notionapi.Properties) string {
 }
 
 func (NotionService) Update(connectionId string, id string, details *models.TaskDetails) (*time.Time, error) {
-	page, err := auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(id), &notionapi.PageUpdateRequest{
+	page, err := auth.NotionClient.Page.Get(context.Background(), notionapi.PageID(id))
+	if err != nil {
+		return nil, err
+	}
+	titleProperty, err := UpdateValueFromProp(page.Properties[viper.GetString(keys.NOTION_NAME_KEY)], details.Title)
+	if err != nil {
+		return nil, err
+	}
+	dateProperty, err := UpdateValueFromProp(page.Properties[viper.GetString(keys.NOTION_DEADLINE_KEY)], details.DueDate.Format(time.RFC3339))
+	if err != nil {
+		return nil, err
+	}
+	page, err = auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(id), &notionapi.PageUpdateRequest{
 		Properties: notionapi.Properties{
-			viper.GetString(keys.NOTION_NAME_KEY):     NewRichTextProperty(details.Title),
-			viper.GetString(keys.NOTION_DEADLINE_KEY): NewDateProperty(*details.DueDate),
+			viper.GetString(keys.NOTION_NAME_KEY):     titleProperty,
+			viper.GetString(keys.NOTION_DEADLINE_KEY): dateProperty,
 		},
 	})
 	if err != nil {
