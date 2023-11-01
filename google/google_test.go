@@ -26,6 +26,26 @@ func TestInsert(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
+	connection := test.GetTestConnection()
+	details := test.CreateDetails()
+	taskId, _, err := Service.Insert(connection.TasksListId, &details)
+	if err != nil {
+		t.Error(err)
+	}
+	details.Title = "Updated title"
+	newDate := details.DueDate.AddDate(0, 0, 1)
+	details.DueDate = &newDate
+	details.Notes = "Updated notes"
+	_, err = Service.Update(connection.TasksListId, taskId, &details)
+	if err != nil {
+		t.Error(err)
+	}
+	task, err := auth.TasksService.Tasks.Get(connection.TasksListId, taskId).Do()
+	if err != nil {
+		t.Error(err)
+	}
+	assertTask(t, *task, details)
+	t.Cleanup(func() { cleanUp(t, connection, task) })
 }
 
 func cleanUp(t *testing.T, connection models.Connection, task *tasks.Task) {

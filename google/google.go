@@ -42,6 +42,7 @@ func (GoogleTaskService) Update(connectionId string, id string, details *models.
 		done = "completed"
 	}
 	task, err := auth.TasksService.Tasks.Update(connectionId, id, &tasks.Task{
+		Id:    id,
 		Title:  details.Title,
 		Due:    details.DueDate.Format(time.RFC3339),
 		Notes:  details.Notes,
