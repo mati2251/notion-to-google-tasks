@@ -24,7 +24,7 @@ func InitViper() {
 	}
 }
 
-func CreateMockConnection() models.Connection {
+func GetTestConnection() models.Connection {
 	InitViper()
 	err := auth.InitConnections()
 	if err != nil {

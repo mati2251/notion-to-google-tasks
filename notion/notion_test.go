@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var connection models.Connection = test.CreateMockConnection()
+var connection models.Connection = test.GetTestConnection()
 
 func TestInsert(t *testing.T) {
 	details := test.CreateDetails()

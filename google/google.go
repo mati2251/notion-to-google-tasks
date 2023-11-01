@@ -21,10 +21,10 @@ func (GoogleTaskService) Insert(connectionId string, details *models.TaskDetails
 		done = "completed"
 	}
 	task, err := auth.TasksService.Tasks.Insert(connectionId, &tasks.Task{
-		Title:     details.Title,
-		Due:       details.DueDate.Format(time.RFC3339),
-		Notes:     details.Notes,
-		Completed: &done,
+		Title:  details.Title,
+		Due:    details.DueDate.Format(time.RFC3339),
+		Notes:  details.Notes,
+		Status: done,
 	}).Do()
 	if err != nil {
 		return "", nil, errors.Join(err, errors.New("error while inserting task"))
@@ -42,10 +42,10 @@ func (GoogleTaskService) Update(connectionId string, id string, details *models.
 		done = "completed"
 	}
 	task, err := auth.TasksService.Tasks.Update(connectionId, id, &tasks.Task{
-		Title:     details.Title,
-		Due:       details.DueDate.Format(time.RFC3339),
-		Notes:     details.Notes,
-		Completed: &done,
+		Title:  details.Title,
+		Due:    details.DueDate.Format(time.RFC3339),
+		Notes:  details.Notes,
+		Status: done,
 	}).Do()
 	if err != nil {
 		return nil, errors.Join(err, errors.New("error while updating task"))
