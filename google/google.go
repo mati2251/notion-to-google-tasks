@@ -65,7 +65,7 @@ func (GoogleTaskService) GetTaskDetails(connectionId string, id string) (*models
 	}
 	notesArr := strings.Split(task.Notes, keys.BREAK_LINE)
 	notes := notesArr[0]
-	if len(notesArr) != 2 {
+	if len(notesArr) < 1 {
 		notes = ""
 	}
 	dueDate, err := time.Parse(time.RFC3339, task.Due)
