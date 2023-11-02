@@ -24,7 +24,7 @@ func TestInsertAndGet(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	connectedTaskFromDb, err := GetTask(connectedTask.TasksId)
+	connectedTaskFromDb, err := GetConnectedTaskByTaskId(connectedTask.TasksId)
 	if err != nil {
 		t.Error(err)
 	}
@@ -45,7 +45,7 @@ func TestInsertAndGet(t *testing.T) {
 	}
 	t.Cleanup(func() {
 		err = RemoveTask(connectedTask.TasksId)
-		connectedTaskFromDb, err = GetTask(connectedTask.TasksId)
+		connectedTaskFromDb, err = GetConnectedTaskByTaskId(connectedTask.TasksId)
 		if err == nil {
 			t.Error("Removing task failed")
 		}

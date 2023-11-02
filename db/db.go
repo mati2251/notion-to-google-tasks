@@ -55,7 +55,7 @@ func Insert(connectedTask models.ConnectedTask) error {
 	return nil
 }
 
-func GetTask(taskId string) (*models.ConnectedTask, error){
+func GetConnectedTaskByTaskId(taskId string) (*models.ConnectedTask, error) {
 	var connectedTaskFromDb models.ConnectedTask
 	err := DB.QueryRow("SELECT * FROM tasks WHERE taskId = ?", taskId).Scan(
 		&connectedTaskFromDb.TasksId,

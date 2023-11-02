@@ -23,13 +23,13 @@ func inserts(ids []string, connectionId string) error {
 	return notionInserts(ids, connectionId)
 }
 
-func googleInserts(ids []string, connectionId string) error {
+func notionInserts(insertedIds []string, connectionId string) error {
 	list, err := auth.TasksService.Tasks.List(connectionId).Do()
 	if err != nil {
 		return errors.Join(err, errors.New("error while getting tasklist"))
 	}
 	for _, task := range list.Items {
-		if !slices.Contains(ids, task.Id) {
+		if !slices.Contains(insertedIds, task.Id) {
 			taskDetails, taskUpdated, err := google.Service.GetTaskDetails(connectionId, task.Id)
 			if err != nil {
 				return err
@@ -53,14 +53,14 @@ func googleInserts(ids []string, connectionId string) error {
 	return nil
 }
 
-func notionInserts(ids []string, connectionId string) error {
+func googleInserts(insertedIds []string, connectionId string) error {
 	notionId := notionapi.DatabaseID(viper.GetString(keys.CONNECTIONS))
 	items, err := auth.NotionClient.Database.Query(context.Background(), notionId, &notionapi.DatabaseQueryRequest{})
 	if err != nil {
 		return errors.Join(err, errors.New("error while getting database"))
 	}
 	for _, page := range items.Results {
-		if !slices.Contains(ids, page.ID.String()) {
+		if !slices.Contains(insertedIds, page.ID.String()) {
 			details, notionUpdated, err := notion.Service.GetTaskDetails(connectionId, page.ID.String())
 			if err != nil {
 				return err
