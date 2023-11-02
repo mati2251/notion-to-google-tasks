@@ -44,9 +44,10 @@ func TestInsertAndGet(t *testing.T) {
 		t.Errorf("expected %d got %d", connectedTask.NotionUpdate.Unix(), connectedTaskFromDb.NotionUpdate.Unix())
 	}
 	t.Cleanup(func() {
-		_, err =DB.Exec("DELETE FROM tasks WHERE taskId = ?", connectedTask.TasksId)
-		if err != nil {
-			t.Error(err)
+		err = RemoveTask(connectedTask.TasksId)
+		connectedTaskFromDb, err = GetTask(connectedTask.TasksId)
+		if err == nil {
+			t.Error("Removing task failed")
 		}
 	})
 }

@@ -66,3 +66,8 @@ func GetTask(taskId string) (*models.ConnectedTask, error){
 	)
 	return &connectedTaskFromDb, err
 }
+
+func RemoveTask(taskId string) error {
+	_, err := DB.Exec("DELETE FROM tasks WHERE taskId = ?", taskId)
+	return err
+}
