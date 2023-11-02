@@ -67,6 +67,18 @@ func GetConnectedTaskByTaskId(taskId string) (*models.ConnectedTask, error) {
 	return &connectedTaskFromDb, err
 }
 
+func GetConnectedTaskByNotionId(notionId string) (*models.ConnectedTask, error) {
+	var connectedTaskFromDb models.ConnectedTask
+	err := DB.QueryRow("SELECT * FROM tasks WHERE notionId = ?", notionId).Scan(
+		&connectedTaskFromDb.TasksId,
+		&connectedTaskFromDb.NotionId,
+		&connectedTaskFromDb.TaskUpdate,
+		&connectedTaskFromDb.NotionUpdate,
+		&connectedTaskFromDb.ConnectionId,
+	)
+	return &connectedTaskFromDb, err
+}
+
 func RemoveTask(taskId string) error {
 	_, err := DB.Exec("DELETE FROM tasks WHERE taskId = ?", taskId)
 	return err

@@ -54,13 +54,14 @@ func notionInserts(insertedIds []string, connectionId string) error {
 }
 
 func googleInserts(insertedIds []string, connectionId string) error {
-	notionId := notionapi.DatabaseID(viper.GetString(keys.CONNECTIONS))
+	notionId := notionapi.DatabaseID(viper.GetString(keys.CONNECTIONS + "." + connectionId))
 	items, err := auth.NotionClient.Database.Query(context.Background(), notionId, &notionapi.DatabaseQueryRequest{})
 	if err != nil {
 		return errors.Join(err, errors.New("error while getting database"))
 	}
 	for _, page := range items.Results {
-		if !slices.Contains(insertedIds, page.ID.String()) {
+		status := notion.GetStringValueFromProperty(page.Properties[viper.GetString(keys.NOTION_STATUS_KEY)])
+		if !slices.Contains(insertedIds, page.ID.String()) && status != viper.GetString(keys.NOTION_DONE_STATUS_VALUE) {
 			details, notionUpdated, err := notion.Service.GetTaskDetails(connectionId, page.ID.String())
 			if err != nil {
 				return err

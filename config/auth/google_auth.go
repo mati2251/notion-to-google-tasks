@@ -87,13 +87,17 @@ func setGoogleToken() (*tasks.Service, error) {
 		return nil, err
 	}
 
+	saveNewToken(tok)
+	return getServiceFromToken(conf, tok)
+}
+
+func saveNewToken(tok *oauth2.Token) {
 	viper.Set(keys.GOOGLE_REFRESH_TOKEN_KEY, tok.RefreshToken)
 	viper.Set(keys.GOOGLE_ACCESS_TOKEN_KEY, tok.AccessToken)
 	viper.Set(keys.GOOGLE_TOKEN_TYPE_KEY, tok.TokenType)
 	viper.Set(keys.GOOGLE_EXPIRY_KEY, tok.Expiry)
 	viper.SafeWriteConfig()
 	viper.WriteConfig()
-	return getServiceFromToken(conf, tok)
 }
 
 func getGoogleOauth2Conf() *oauth2.Config {
@@ -117,6 +121,7 @@ func getServiceFromToken(conf *oauth2.Config, tok *oauth2.Token) (*tasks.Service
 	ctx := context.Background()
 	client := conf.Client(ctx, tok)
 	srv, err := tasks.NewService(ctx, option.WithHTTPClient(client))
+	saveNewToken(tok)
 	if err != nil {
 		log.Fatalf("Unable to retrieve tasks Client %v", err)
 		return nil, err
