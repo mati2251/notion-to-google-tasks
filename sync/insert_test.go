@@ -67,7 +67,7 @@ func TestGoogleInserts(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err = googleInserts([]string{}, connection.TasksListId)
+	err = googleInserts(ids, connection.TasksListId)
 	if err != nil {
 		t.Error(err)
 	}
