@@ -38,6 +38,9 @@ func initDatabase() error {
 }
 
 func Insert(connectedTask models.ConnectedTask) error {
+	if DB == nil {
+		return errors.New("database not opened")
+	}
 	_, err := DB.Exec(
 		"INSERT INTO tasks(taskId, notionId, taskUpdate, notionUpdate, connectionId) VALUES (?, ?, ?, ?, ?)",
 		connectedTask.TasksId,
@@ -50,4 +53,16 @@ func Insert(connectedTask models.ConnectedTask) error {
 		return errors.Join(err, errors.New("error while inserting task"))
 	}
 	return nil
+}
+
+func GetTask(taskId string) (*models.ConnectedTask, error){
+	var connectedTaskFromDb models.ConnectedTask
+	err := DB.QueryRow("SELECT * FROM tasks WHERE taskId = ?", taskId).Scan(
+		&connectedTaskFromDb.TasksId,
+		&connectedTaskFromDb.NotionId,
+		&connectedTaskFromDb.TaskUpdate,
+		&connectedTaskFromDb.NotionUpdate,
+		&connectedTaskFromDb.ConnectionId,
+	)
+	return &connectedTaskFromDb, err
 }
