@@ -91,9 +91,9 @@ func RemoveTask(taskId string) error {
 	return err
 }
 
-func GetConnectedTasks() ([]models.ConnectedTask, error) {
+func GetConnectedTasks(connectionId string) ([]models.ConnectedTask, error) {
 	var connectedTasks []models.ConnectedTask
-	rows, err := DB.Query("SELECT * FROM tasks")
+	rows, err := DB.Query("SELECT * FROM tasks WHERE connectionId = ?", connectionId)
 	if err != nil {
 		return connectedTasks, err
 	}

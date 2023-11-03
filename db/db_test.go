@@ -56,6 +56,7 @@ func TestInsertAndGet(t *testing.T) {
 
 func TestGetConnectedTasks(t *testing.T) {
 	test.InitViper()
+	connection := test.GetTestConnection()
 	err := OpenFile()
 	if err != nil {
 		t.Error(err)
@@ -67,7 +68,7 @@ func TestGetConnectedTasks(t *testing.T) {
 		NotionId:     "notion-123",
 		TaskUpdate:   &now,
 		NotionUpdate: &now,
-		ConnectionId: "conn-123",
+		ConnectionId: connection.TasksListId,
 	}
 	err = Insert(connectedTask1)
 	if err != nil {
@@ -79,14 +80,14 @@ func TestGetConnectedTasks(t *testing.T) {
 		NotionId:     "notion-456",
 		TaskUpdate:   &now,
 		NotionUpdate: &now,
-		ConnectionId: "conn-456",
+		ConnectionId: connection.TasksListId,
 	}
 	err = Insert(connectedTask2)
 	if err != nil {
 		t.Error(err)
 	}
 
-	connectedTasks, err := GetConnectedTasks()
+	connectedTasks, err := GetConnectedTasks(connection.TasksListId)
 	if err != nil {
 		t.Error(err)
 	}
@@ -126,13 +127,15 @@ func TestGetConnectedTasks(t *testing.T) {
 	if connectedTasks[1].NotionUpdate.Unix() != connectedTask2.NotionUpdate.Unix() {
 		t.Errorf("expected %d got %d", connectedTask2.NotionUpdate.Unix(), connectedTasks[1].NotionUpdate.Unix())
 	}
-
-	err = RemoveTask(connectedTask1.TasksId)
-	if err != nil {
-		t.Error(err)
-	}
-	err = RemoveTask(connectedTask2.TasksId)
-	if err != nil {
-		t.Error(err)
-	}
+	t.Cleanup(func() {
+		err = RemoveTask(connectedTask1.TasksId)
+		if err != nil {
+			t.Error(err)
+		}
+		err = RemoveTask(connectedTask2.TasksId)
+		if err != nil {
+			t.Error(err)
+		}	
+	})
+	
 }
