@@ -19,16 +19,23 @@ func OpenFile() error {
 	}
 	filepath := home + keys.FILES_PATH + keys.DB_FILE
 	_, errIfExist := os.Stat(filepath)
-	DB, err = sql.Open("sqlite3", filepath)
-	if err != nil {
-		return err
-	}
 	if os.IsNotExist(errIfExist) {
+		_ = os.MkdirAll(home+keys.FILES_PATH, os.ModePerm)
+		DB, err = sql.Open("sqlite3", filepath)
+		if err != nil {
+			return err
+		}
 		err = initDatabase()
 		if err != nil {
 			return err
 		}
+	} else {
+		DB, err = sql.Open("sqlite3", filepath)
 	}
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
