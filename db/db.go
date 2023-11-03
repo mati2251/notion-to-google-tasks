@@ -90,3 +90,27 @@ func RemoveTask(taskId string) error {
 	_, err := DB.Exec("DELETE FROM tasks WHERE taskId = ?", taskId)
 	return err
 }
+
+func GetConnectedTasks() ([]models.ConnectedTask, error) {
+	var connectedTasks []models.ConnectedTask
+	rows, err := DB.Query("SELECT * FROM tasks")
+	if err != nil {
+		return connectedTasks, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var connectedTask models.ConnectedTask
+		err = rows.Scan(
+			&connectedTask.TasksId,
+			&connectedTask.NotionId,
+			&connectedTask.TaskUpdate,
+			&connectedTask.NotionUpdate,
+			&connectedTask.ConnectionId,
+		)
+		if err != nil {
+			return connectedTasks, err
+		}
+		connectedTasks = append(connectedTasks, connectedTask)
+	}
+	return connectedTasks, nil
+}

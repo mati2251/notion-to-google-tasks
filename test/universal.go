@@ -8,6 +8,7 @@ import (
 
 	"github.com/jomei/notionapi"
 	"github.com/mati2251/notion-to-google-tasks/config/auth"
+	"github.com/mati2251/notion-to-google-tasks/keys"
 	"github.com/mati2251/notion-to-google-tasks/models"
 	"github.com/spf13/viper"
 )
@@ -19,6 +20,7 @@ func InitViper() {
 	viper.SetConfigName("test")
 	viper.SetConfigType("yaml")
 	error := viper.ReadInConfig()
+	keys.DB_FILE = "/test.db"
 	if error != nil {
 		panic(error)
 	}

@@ -5,9 +5,11 @@ import (
 	"time"
 
 	"github.com/mati2251/notion-to-google-tasks/models"
+	"github.com/mati2251/notion-to-google-tasks/test"
 )
 
 func TestInsertAndGet(t *testing.T) {
+	test.InitViper()
 	err := OpenFile()
 	if err != nil {
 		t.Error(err)
@@ -50,4 +52,87 @@ func TestInsertAndGet(t *testing.T) {
 			t.Error("Removing task failed")
 		}
 	})
+}
+
+func TestGetConnectedTasks(t *testing.T) {
+	test.InitViper()
+	err := OpenFile()
+	if err != nil {
+		t.Error(err)
+	}
+
+	now := time.Now()
+	connectedTask1 := models.ConnectedTask{
+		TasksId:      "task-123",
+		NotionId:     "notion-123",
+		TaskUpdate:   &now,
+		NotionUpdate: &now,
+		ConnectionId: "conn-123",
+	}
+	err = Insert(connectedTask1)
+	if err != nil {
+		t.Error(err)
+	}
+
+	connectedTask2 := models.ConnectedTask{
+		TasksId:      "task-456",
+		NotionId:     "notion-456",
+		TaskUpdate:   &now,
+		NotionUpdate: &now,
+		ConnectionId: "conn-456",
+	}
+	err = Insert(connectedTask2)
+	if err != nil {
+		t.Error(err)
+	}
+
+	connectedTasks, err := GetConnectedTasks()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(connectedTasks) != 2 {
+		t.Errorf("expected 2 connected tasks, got %d", len(connectedTasks))
+	}
+
+	if connectedTasks[0].TasksId != connectedTask1.TasksId {
+		t.Errorf("expected %s got %s", connectedTask1.TasksId, connectedTasks[0].TasksId)
+	}
+	if connectedTasks[0].NotionId != connectedTask1.NotionId {
+		t.Errorf("expected %s got %s", connectedTask1.NotionId, connectedTasks[0].NotionId)
+	}
+	if connectedTasks[0].ConnectionId != connectedTask1.ConnectionId {
+		t.Errorf("expected %s got %s", connectedTask1.ConnectionId, connectedTasks[0].ConnectionId)
+	}
+	if connectedTasks[0].TaskUpdate.Unix() != connectedTask1.TaskUpdate.Unix() {
+		t.Errorf("expected %d got %d", connectedTask1.TaskUpdate.Unix(), connectedTasks[0].TaskUpdate.Unix())
+	}
+	if connectedTasks[0].NotionUpdate.Unix() != connectedTask1.NotionUpdate.Unix() {
+		t.Errorf("expected %d got %d", connectedTask1.NotionUpdate.Unix(), connectedTasks[0].NotionUpdate.Unix())
+	}
+
+	if connectedTasks[1].TasksId != connectedTask2.TasksId {
+		t.Errorf("expected %s got %s", connectedTask2.TasksId, connectedTasks[1].TasksId)
+	}
+	if connectedTasks[1].NotionId != connectedTask2.NotionId {
+		t.Errorf("expected %s got %s", connectedTask2.NotionId, connectedTasks[1].NotionId)
+	}
+	if connectedTasks[1].ConnectionId != connectedTask2.ConnectionId {
+		t.Errorf("expected %s got %s", connectedTask2.ConnectionId, connectedTasks[1].ConnectionId)
+	}
+	if connectedTasks[1].TaskUpdate.Unix() != connectedTask2.TaskUpdate.Unix() {
+		t.Errorf("expected %d got %d", connectedTask2.TaskUpdate.Unix(), connectedTasks[1].TaskUpdate.Unix())
+	}
+	if connectedTasks[1].NotionUpdate.Unix() != connectedTask2.NotionUpdate.Unix() {
+		t.Errorf("expected %d got %d", connectedTask2.NotionUpdate.Unix(), connectedTasks[1].NotionUpdate.Unix())
+	}
+
+	err = RemoveTask(connectedTask1.TasksId)
+	if err != nil {
+		t.Error(err)
+	}
+	err = RemoveTask(connectedTask2.TasksId)
+	if err != nil {
+		t.Error(err)
+	}
 }
