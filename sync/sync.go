@@ -11,7 +11,7 @@ func Sync(connections []models.Connection) error {
 		return err
 	}
 	for _, connection := range connections {
-		ids, err := updates()
+		ids, err := updates(connection.TasksListId)
 		if err != nil {
 			return err
 		}
