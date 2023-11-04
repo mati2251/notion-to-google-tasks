@@ -8,7 +8,7 @@ import (
 
 func GetConnections() []models.Connection {
 	var connections []models.Connection
-	for notionDatabaseId, tasksListId := range viper.GetStringMapString(keys.CONNECTIONS) {
+	for notionDatabaseId, tasksListId  := range viper.GetStringMapString(keys.CONNECTIONS) {
 		connections = append(connections, models.Connection{NotionDatabasId: notionDatabaseId, TasksListId: tasksListId})
 	}
 	return connections

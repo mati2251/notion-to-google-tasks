@@ -8,9 +8,11 @@ import (
 	"github.com/mati2251/notion-to-google-tasks/config/auth"
 	"github.com/mati2251/notion-to-google-tasks/db"
 	"github.com/mati2251/notion-to-google-tasks/google"
+	"github.com/mati2251/notion-to-google-tasks/keys"
 	"github.com/mati2251/notion-to-google-tasks/models"
 	"github.com/mati2251/notion-to-google-tasks/notion"
 	"github.com/mati2251/notion-to-google-tasks/test"
+	"github.com/spf13/viper"
 )
 
 func TestNotionInserts(t *testing.T) {
@@ -28,11 +30,11 @@ func TestNotionInserts(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	taskId, _, err := google.Service.Insert(connection.TasksListId, &taskDetails)
+	taskId, _, err := google.Service.Insert(connection.NotionDatabasId, &taskDetails)
 	if err != nil {
 		t.Error(err)
 	}
-	err = notionInserts(ids, connection.TasksListId)
+	err = notionInserts(ids, connection.NotionDatabasId)
 	if err != nil {
 		t.Error(err)
 	}
@@ -63,11 +65,11 @@ func TestGoogleInserts(t *testing.T) {
 	for _, task := range items.Results {
 		ids = append(ids, string(task.ID))
 	}
-	notionId, _, err := notion.Service.Insert(connection.TasksListId, &taskDetails)
+	notionId, _, err := notion.Service.Insert(connection.NotionDatabasId, &taskDetails)
 	if err != nil {
 		t.Error(err)
 	}
-	err = googleInserts(ids, connection.TasksListId)
+	err = googleInserts(ids, connection.NotionDatabasId)
 	if err != nil {
 		t.Error(err)
 	}
@@ -103,7 +105,8 @@ func compareTasks(t *testing.T, connectedTask models.ConnectedTask) {
 }
 
 func cleanUp(t *testing.T, connectedTask models.ConnectedTask) {
-	err := auth.TasksService.Tasks.Delete(connectedTask.ConnectionId, connectedTask.TasksId).Do()
+	tasksListId := viper.GetString(keys.CONNECTIONS + "." + connectedTask.ConnectionId)
+	err := auth.TasksService.Tasks.Delete(tasksListId, connectedTask.TasksId).Do()
 	if err != nil {
 		t.Error(err)
 	}

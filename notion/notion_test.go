@@ -17,7 +17,7 @@ var connection models.Connection = test.GetTestConnection()
 
 func TestInsert(t *testing.T) {
 	details := test.CreateDetails()
-	id, updated, err := Service.Insert(connection.TasksListId, &details)
+	id, updated, err := Service.Insert(connection.NotionDatabasId, &details)
 	if err != nil {
 		t.Error(err)
 	}
@@ -49,11 +49,11 @@ func TestInsert(t *testing.T) {
 
 func TestGetTaskDetails(t *testing.T) {
 	details := test.CreateDetails()
-	pageId, _, err := Service.Insert(connection.TasksListId, &details)
+	pageId, _, err := Service.Insert(connection.NotionDatabasId, &details)
 	if err != nil {
 		t.Error(err)
 	}
-	taskDetails, _, err := Service.GetTaskDetails(connection.TasksListId, pageId)
+	taskDetails, _, err := Service.GetTaskDetails(connection.NotionDatabasId, pageId)
 	if err != nil {
 		t.Error(err)
 	}
@@ -92,7 +92,7 @@ func TestCreateNotes(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	details := test.CreateDetails()
-	pageId, _, err := Service.Insert(connection.TasksListId, &details)
+	pageId, _, err := Service.Insert(connection.NotionDatabasId, &details)
 	if err != nil {
 		t.Error(err)
 	}
@@ -100,11 +100,11 @@ func TestUpdate(t *testing.T) {
 	newDate := details.DueDate.AddDate(0, 0, 1)
 	details.DueDate = &newDate
 	details.Done = true
-	_, err = Service.Update(connection.TasksListId, pageId, &details)
+	_, err = Service.Update(connection.NotionDatabasId, pageId, &details)
 	if err != nil {
 		t.Error(err)
 	}
-	taskDetails, _, err := Service.GetTaskDetails(connection.TasksListId, pageId)
+	taskDetails, _, err := Service.GetTaskDetails(connection.NotionDatabasId, pageId)
 	if err != nil {
 		t.Error(err)
 	}

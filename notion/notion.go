@@ -17,9 +17,10 @@ type NotionService struct{}
 var Service models.Service = NotionService{}
 
 func (NotionService) Insert(connectionId string, details *models.TaskDetails) (string, *time.Time, error) {
+	databaseId := notionapi.DatabaseID(connectionId)
 	page, err := auth.NotionClient.Page.Create(context.Background(), &notionapi.PageCreateRequest{
 		Parent: notionapi.Parent{
-			DatabaseID: notionapi.DatabaseID(viper.GetString(keys.CONNECTIONS + "." + connectionId)),
+			DatabaseID: databaseId,
 			Type:       "database_id",
 		},
 		Properties: notionapi.Properties{
@@ -41,16 +42,21 @@ func (NotionService) GetTaskDetails(connectionId string, id string) (*models.Tas
 		return nil, nil, errors.Join(err, errors.New("error while getting page"))
 	}
 	title := GetStringValueFromProperty(page.Properties[viper.GetString(keys.NOTION_NAME_KEY)])
-	due_date_str := GetStringValueFromProperty(page.Properties[viper.GetString(keys.NOTION_DEADLINE_KEY)])
-	due_date, err := time.Parse(time.RFC3339, due_date_str)
+	dueDateStr := GetStringValueFromProperty(page.Properties[viper.GetString(keys.NOTION_DEADLINE_KEY)])
+	dueDate, err := time.Parse(time.RFC3339, dueDateStr)
+	dueDatePtr := &dueDate
 	done := GetStringValueFromProperty(page.Properties[viper.GetString(keys.NOTION_STATUS_KEY)]) == viper.GetString(keys.NOTION_DONE_STATUS_VALUE)
 	if err != nil {
-		return nil, nil, errors.Join(err, errors.New("error parsing due date"))
+		if dueDateStr == "" {
+			dueDatePtr = nil
+		} else {
+			return nil, nil, errors.Join(err, errors.New("error parsing due date"))
+		}
 	}
 	notes := createNotes(page.Properties)
 	return &models.TaskDetails{
 		Title:   title,
-		DueDate: &due_date,
+		DueDate: dueDatePtr,
 		Done:    done,
 		Notes:   notes,
 	}, &page.LastEditedTime, nil

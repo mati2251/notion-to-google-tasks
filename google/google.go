@@ -8,6 +8,7 @@ import (
 	"github.com/mati2251/notion-to-google-tasks/config/auth"
 	"github.com/mati2251/notion-to-google-tasks/keys"
 	"github.com/mati2251/notion-to-google-tasks/models"
+	"github.com/spf13/viper"
 	"google.golang.org/api/tasks/v1"
 )
 
@@ -20,7 +21,8 @@ func (GoogleTaskService) Insert(connectionId string, details *models.TaskDetails
 	if details.Done {
 		done = "completed"
 	}
-	task, err := auth.TasksService.Tasks.Insert(connectionId, &tasks.Task{
+	taskListId := viper.GetString(keys.CONNECTIONS + "." + connectionId)
+	task, err := auth.TasksService.Tasks.Insert(taskListId, &tasks.Task{
 		Title:  details.Title,
 		Due:    details.DueDate.Format(time.RFC3339),
 		Notes:  details.Notes,
@@ -41,8 +43,9 @@ func (GoogleTaskService) Update(connectionId string, id string, details *models.
 	if details.Done {
 		done = "completed"
 	}
-	task, err := auth.TasksService.Tasks.Update(connectionId, id, &tasks.Task{
-		Id:    id,
+	taskListId := viper.GetString(keys.CONNECTIONS + "." + connectionId)
+	task, err := auth.TasksService.Tasks.Update(taskListId, id, &tasks.Task{
+		Id:     id,
 		Title:  details.Title,
 		Due:    details.DueDate.Format(time.RFC3339),
 		Notes:  details.Notes,
@@ -59,7 +62,8 @@ func (GoogleTaskService) Update(connectionId string, id string, details *models.
 }
 
 func (GoogleTaskService) GetTaskDetails(connectionId string, id string) (*models.TaskDetails, *time.Time, error) {
-	task, err := auth.TasksService.Tasks.Get(connectionId, id).Do()
+	taskListId := viper.GetString(keys.CONNECTIONS + "." + connectionId)
+	task, err := auth.TasksService.Tasks.Get(taskListId, id).Do()
 	if err != nil {
 		return nil, nil, errors.Join(err, errors.New("error while getting task"))
 	}
@@ -69,8 +73,13 @@ func (GoogleTaskService) GetTaskDetails(connectionId string, id string) (*models
 		notes = ""
 	}
 	dueDate, err := time.Parse(time.RFC3339, task.Due)
+	dueDatePointer := &dueDate
 	if err != nil {
-		return nil, nil, errors.Join(err, errors.New("error while parsing due date"))
+		if task.Due == "" {
+			dueDatePointer = nil
+		} else {
+			return nil, nil, errors.Join(err, errors.New("error while parsing due date"))
+		}
 	}
 	updated, err := time.Parse(time.RFC3339, task.Updated)
 	if err != nil {
@@ -80,7 +89,7 @@ func (GoogleTaskService) GetTaskDetails(connectionId string, id string) (*models
 		Title:   task.Title,
 		Done:    task.Status == "completed",
 		Notes:   notes,
-		DueDate: &dueDate,
+		DueDate: dueDatePointer,
 	}
 	return taskDetails, &updated, nil
 }

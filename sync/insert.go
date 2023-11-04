@@ -24,7 +24,8 @@ func inserts(ids []string, connectionId string) error {
 }
 
 func notionInserts(insertedIds []string, connectionId string) error {
-	list, err := auth.TasksService.Tasks.List(connectionId).Do()
+	taskListId := viper.GetString(keys.CONNECTIONS + "." + connectionId)
+	list, err := auth.TasksService.Tasks.List(taskListId).Do()
 	if err != nil {
 		return errors.Join(err, errors.New("error while getting tasklist"))
 	}
@@ -54,7 +55,7 @@ func notionInserts(insertedIds []string, connectionId string) error {
 }
 
 func googleInserts(insertedIds []string, connectionId string) error {
-	notionId := notionapi.DatabaseID(viper.GetString(keys.CONNECTIONS + "." + connectionId))
+	notionId := notionapi.DatabaseID(connectionId)
 	items, err := auth.NotionClient.Database.Query(context.Background(), notionId, &notionapi.DatabaseQueryRequest{})
 	if err != nil {
 		return errors.Join(err, errors.New("error while getting database"))

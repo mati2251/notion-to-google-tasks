@@ -12,7 +12,7 @@ import (
 func TestInsert(t *testing.T) {
 	connection := test.GetTestConnection()
 	details := test.CreateDetails()
-	taskId, _, err := Service.Insert(connection.TasksListId, &details)
+	taskId, _, err := Service.Insert(connection.NotionDatabasId, &details)
 	if err != nil {
 		t.Error(err)
 	}
@@ -28,7 +28,7 @@ func TestInsert(t *testing.T) {
 func TestUpdate(t *testing.T) {
 	connection := test.GetTestConnection()
 	details := test.CreateDetails()
-	taskId, _, err := Service.Insert(connection.TasksListId, &details)
+	taskId, _, err := Service.Insert(connection.NotionDatabasId, &details)
 	if err != nil {
 		t.Error(err)
 	}
@@ -36,7 +36,7 @@ func TestUpdate(t *testing.T) {
 	newDate := details.DueDate.AddDate(0, 0, 1)
 	details.DueDate = &newDate
 	details.Notes = "Updated notes"
-	_, err = Service.Update(connection.TasksListId, taskId, &details)
+	_, err = Service.Update(connection.NotionDatabasId, taskId, &details)
 	if err != nil {
 		t.Error(err)
 	}
@@ -51,11 +51,11 @@ func TestUpdate(t *testing.T) {
 func TestGetTaskDetails(t *testing.T) {
 	connection := test.GetTestConnection()
 	details := test.CreateDetails()
-	taskId, _, err := Service.Insert(connection.TasksListId, &details)
+	taskId, _, err := Service.Insert(connection.NotionDatabasId, &details)
 	if err != nil {
 		t.Error(err)
 	}
-	taskDetails, _, err := Service.GetTaskDetails(connection.TasksListId, taskId)
+	taskDetails, _, err := Service.GetTaskDetails(connection.NotionDatabasId, taskId)
 	if err != nil {
 		t.Error(err)
 	}

@@ -15,11 +15,10 @@ func updates(connectionId string) ([]string, error) {
 		ids = append(ids, connectedTask.TasksId)
 		ids = append(ids, connectedTask.NotionId)
 	}
-	err = inserts(ids, connectionId)
 	if err != nil {
 		return nil, err
 	}
-	return []string{}, nil
+	return ids, nil
 }
 
 func update(connectedTask models.ConnectedTask) {
