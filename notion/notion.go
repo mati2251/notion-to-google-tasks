@@ -18,17 +18,20 @@ var Service models.Service = NotionService{}
 
 func (NotionService) Insert(connectionId string, details *models.TaskDetails) (string, *time.Time, error) {
 	databaseId := notionapi.DatabaseID(connectionId)
+	properties := notionapi.Properties{
+		viper.GetString(keys.NOTION_NAME_KEY): notionapi.TitleProperty{
+			Title: []notionapi.RichText{NewRichText(details.Title)},
+		},
+	}
+	if details.DueDate != nil {
+		properties[viper.GetString(keys.NOTION_DEADLINE_KEY)] = NewDateProperty(*details.DueDate)
+	}
 	page, err := auth.NotionClient.Page.Create(context.Background(), &notionapi.PageCreateRequest{
 		Parent: notionapi.Parent{
 			DatabaseID: databaseId,
 			Type:       "database_id",
 		},
-		Properties: notionapi.Properties{
-			viper.GetString(keys.NOTION_NAME_KEY): notionapi.TitleProperty{
-				Title: []notionapi.RichText{NewRichText(details.Title)},
-			},
-			viper.GetString(keys.NOTION_DEADLINE_KEY): NewDateProperty(*details.DueDate),
-		},
+		Properties: properties,
 	})
 	if err != nil {
 		return "", nil, err

@@ -47,6 +47,39 @@ func TestInsert(t *testing.T) {
 	})
 }
 
+func TestInsertWithNullDate(t *testing.T) {
+	details := test.CreateDetails()
+	details.DueDate = nil
+	id, updated, err := Service.Insert(connection.NotionDatabasId, &details)
+	if err != nil {
+		t.Error(err)
+	}
+	page, err := auth.NotionClient.Page.Get(context.Background(), notionapi.PageID(id))
+	if err != nil {
+		t.Error(err)
+	}
+	newTitle := GetStringValueFromProperty(page.Properties[viper.GetString(keys.NOTION_NAME_KEY)])
+	if newTitle != details.Title {
+		t.Errorf("Title is not correct: new value %v correct value %v", newTitle, details.Title)
+	}
+	newDate := GetStringValueFromProperty(page.Properties[viper.GetString(keys.NOTION_DEADLINE_KEY)])
+	if newDate != "" {
+		t.Errorf("Deadline is not correct: new value %v correct value %v", newDate, details.DueDate.Format(time.RFC3339))
+	}
+	if page.LastEditedTime != *updated {
+		t.Error("Last edited time is not correct")
+	}
+	t.Cleanup(func() {
+		_, err := auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(id), &notionapi.PageUpdateRequest{
+			Archived:   true,
+			Properties: notionapi.Properties{},
+		})
+		if err != nil {
+			t.Error(err)
+		}
+	})
+}
+
 func TestGetTaskDetails(t *testing.T) {
 	details := test.CreateDetails()
 	pageId, _, err := Service.Insert(connection.NotionDatabasId, &details)
@@ -61,6 +94,37 @@ func TestGetTaskDetails(t *testing.T) {
 		t.Errorf("Title is not correct: new value %v correct value %v", taskDetails.Title, details.Title)
 	}
 	if taskDetails.DueDate.Format(time.RFC3339) != details.DueDate.Format(time.RFC3339) {
+		t.Errorf("Deadline is not correct: new value %v correct value %v", taskDetails.DueDate.Format(time.RFC3339), details.DueDate.Format(time.RFC3339))
+	}
+	if taskDetails.Done != details.Done {
+		t.Errorf("Done is not correct: new value %v correct value %v", taskDetails.Done, details.Done)
+	}
+	t.Cleanup(func() {
+		_, err := auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(pageId), &notionapi.PageUpdateRequest{
+			Archived:   true,
+			Properties: notionapi.Properties{},
+		})
+		if err != nil {
+			t.Error(err)
+		}
+	})
+}
+
+func TestGetTaskDetailsWithNullDate(t *testing.T) {
+	details := test.CreateDetails()
+	details.DueDate = nil
+	pageId, _, err := Service.Insert(connection.NotionDatabasId, &details)
+	if err != nil {
+		t.Error(err)
+	}
+	taskDetails, _, err := Service.GetTaskDetails(connection.NotionDatabasId, pageId)
+	if err != nil {
+		t.Error(err)
+	}
+	if taskDetails.Title != details.Title {
+		t.Errorf("Title is not correct: new value %v correct value %v", taskDetails.Title, details.Title)
+	}
+	if taskDetails.DueDate != nil {
 		t.Errorf("Deadline is not correct: new value %v correct value %v", taskDetails.DueDate.Format(time.RFC3339), details.DueDate.Format(time.RFC3339))
 	}
 	if taskDetails.Done != details.Done {

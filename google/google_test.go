@@ -22,7 +22,22 @@ func TestInsert(t *testing.T) {
 	}
 	assertTask(t, *task, details)
 	t.Cleanup(func() { cleanUp(t, connection, task) })
+}
 
+func TestInsertWithNullDate(t *testing.T) {
+	connection := test.GetTestConnection()
+	details := test.CreateDetails()
+	details.DueDate = nil
+	taskId, _, err := Service.Insert(connection.NotionDatabasId, &details)
+	if err != nil {
+		t.Error(err)
+	}
+	task, err := auth.TasksService.Tasks.Get(connection.TasksListId, taskId).Do()
+	if err != nil {
+		t.Error(err)
+	}
+	assertTask(t, *task, details)
+	t.Cleanup(func() { cleanUp(t, connection, task) })
 }
 
 func TestUpdate(t *testing.T) {
@@ -67,6 +82,26 @@ func TestGetTaskDetails(t *testing.T) {
 	t.Cleanup(func() { cleanUp(t, connection, &tasks.Task{Id: taskId}) })
 }
 
+func TestGetTaskDetailsWithNullDate(t *testing.T) {
+	connection := test.GetTestConnection()
+	details := test.CreateDetails()
+	details.DueDate = nil
+	taskId, _, err := Service.Insert(connection.NotionDatabasId, &details)
+	if err != nil {
+		t.Error(err)
+	}
+	taskDetails, _, err := Service.GetTaskDetails(connection.NotionDatabasId, taskId)
+	if err != nil {
+		t.Error(err)
+	}
+	task, err := auth.TasksService.Tasks.Get(connection.TasksListId, taskId).Do()
+	if err != nil {
+		t.Error(err)
+	}
+	assertTask(t, *task, *taskDetails)
+	t.Cleanup(func() { cleanUp(t, connection, &tasks.Task{Id: taskId}) })
+}
+
 func cleanUp(t *testing.T, connection models.Connection, task *tasks.Task) {
 	err := auth.TasksService.Tasks.Delete(connection.TasksListId, task.Id).Do()
 	if err != nil {
@@ -84,8 +119,9 @@ func assertTask(t *testing.T, task tasks.Task, details models.TaskDetails) {
 	if task.Status != "needsAction" {
 		t.Errorf("Expected status: needsAction, got: %s", task.Status)
 	}
-	if task.Due[:10] != details.DueDate.Format("2006-01-02") {
-		t.Errorf("Expected due date: %s, got: %s", details.DueDate.Format("2006-01-02"), task.Due[:10])
+	if task.Due != "" && details.DueDate != nil {
+		if task.Due[:10] != details.DueDate.Format("2006-01-02") {
+			t.Errorf("Expected due date: %s, got: %s", details.DueDate.Format("2006-01-02"), task.Due[:10])
+		}
 	}
-
 }

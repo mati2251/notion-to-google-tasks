@@ -21,13 +21,17 @@ func (GoogleTaskService) Insert(connectionId string, details *models.TaskDetails
 	if details.Done {
 		done = "completed"
 	}
-	taskListId := viper.GetString(keys.CONNECTIONS + "." + connectionId)
-	task, err := auth.TasksService.Tasks.Insert(taskListId, &tasks.Task{
+	newTask := &tasks.Task{
 		Title:  details.Title,
-		Due:    details.DueDate.Format(time.RFC3339),
 		Notes:  details.Notes,
 		Status: done,
-	}).Do()
+	}
+	if details.DueDate != nil {
+		newTask.Due = details.DueDate.Format(time.RFC3339)
+	}
+
+	taskListId := viper.GetString(keys.CONNECTIONS + "." + connectionId)
+	task, err := auth.TasksService.Tasks.Insert(taskListId, newTask).Do()
 	if err != nil {
 		return "", nil, errors.Join(err, errors.New("error while inserting task"))
 	}
@@ -43,11 +47,15 @@ func (GoogleTaskService) Update(connectionId string, id string, details *models.
 	if details.Done {
 		done = "completed"
 	}
+	dueDate := ""
+	if details.DueDate != nil {
+		dueDate = details.DueDate.Format(time.RFC3339)
+	}
 	taskListId := viper.GetString(keys.CONNECTIONS + "." + connectionId)
 	task, err := auth.TasksService.Tasks.Update(taskListId, id, &tasks.Task{
 		Id:     id,
 		Title:  details.Title,
-		Due:    details.DueDate.Format(time.RFC3339),
+		Due:    dueDate,
 		Notes:  details.Notes,
 		Status: done,
 	}).Do()
