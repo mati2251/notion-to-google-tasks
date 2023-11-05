@@ -16,26 +16,27 @@ import (
 )
 
 func inserts(ids []string, connectionId string) error {
-	err := googleInserts(ids, connectionId)
+	err := googleInserts(&ids, connectionId)
 	if err != nil {
 		return err
 	}
-	return notionInserts(ids, connectionId)
+	return notionInserts(&ids, connectionId)
 }
 
-func notionInserts(insertedIds []string, connectionId string) error {
+func notionInserts(insertedIds *[]string, connectionId string) error {
 	taskListId := viper.GetString(keys.CONNECTIONS + "." + connectionId)
 	list, err := auth.TasksService.Tasks.List(taskListId).Do()
 	if err != nil {
 		return errors.Join(err, errors.New("error while getting tasklist"))
 	}
 	for _, task := range list.Items {
-		if !slices.Contains(insertedIds, task.Id) {
+		if !slices.Contains(*insertedIds, task.Id) {
 			taskDetails, taskUpdated, err := google.Service.GetTaskDetails(connectionId, task.Id)
 			if err != nil {
 				return err
 			}
 			notionId, notionUpdated, err := notion.Service.Insert(connectionId, taskDetails)
+			*insertedIds = append(*insertedIds, notionId)
 			if err != nil {
 				return errors.Join(err, errors.New("error while inserting task"))
 			}
@@ -54,7 +55,7 @@ func notionInserts(insertedIds []string, connectionId string) error {
 	return nil
 }
 
-func googleInserts(insertedIds []string, connectionId string) error {
+func googleInserts(insertedIds *[]string, connectionId string) error {
 	notionId := notionapi.DatabaseID(connectionId)
 	items, err := auth.NotionClient.Database.Query(context.Background(), notionId, &notionapi.DatabaseQueryRequest{})
 	if err != nil {
@@ -62,7 +63,7 @@ func googleInserts(insertedIds []string, connectionId string) error {
 	}
 	for _, page := range items.Results {
 		status := notion.GetStringValueFromProperty(page.Properties[viper.GetString(keys.NOTION_STATUS_KEY)])
-		if !slices.Contains(insertedIds, page.ID.String()) && status != viper.GetString(keys.NOTION_DONE_STATUS_VALUE) {
+		if !slices.Contains(*insertedIds, page.ID.String()) && status != viper.GetString(keys.NOTION_DONE_STATUS_VALUE) {
 			details, notionUpdated, err := notion.Service.GetTaskDetails(connectionId, page.ID.String())
 			if err != nil {
 				return err
@@ -71,6 +72,7 @@ func googleInserts(insertedIds []string, connectionId string) error {
 			if err != nil {
 				return errors.Join(err, errors.New("error while inserting task"))
 			}
+			*insertedIds = append(*insertedIds, taskId)
 			err = db.Insert(models.ConnectedTask{
 				TasksId:      taskId,
 				NotionId:     page.ID.String(),

@@ -34,7 +34,7 @@ func TestNotionInserts(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err = notionInserts(ids, connection.NotionDatabasId)
+	err = notionInserts(&ids, connection.NotionDatabasId)
 	if err != nil {
 		t.Error(err)
 	}
@@ -69,7 +69,7 @@ func TestGoogleInserts(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err = googleInserts(ids, connection.NotionDatabasId)
+	err = googleInserts(&ids, connection.NotionDatabasId)
 	if err != nil {
 		t.Error(err)
 	}

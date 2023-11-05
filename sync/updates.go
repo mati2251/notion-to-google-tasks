@@ -2,7 +2,6 @@ package sync
 
 import (
 	"github.com/mati2251/notion-to-google-tasks/db"
-	"github.com/mati2251/notion-to-google-tasks/models"
 )
 
 func updates(connectionId string) ([]string, error) {
@@ -19,8 +18,4 @@ func updates(connectionId string) ([]string, error) {
 		return nil, err
 	}
 	return ids, nil
-}
-
-func update(connectedTask models.ConnectedTask) {
-	
 }
