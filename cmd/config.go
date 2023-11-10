@@ -52,8 +52,6 @@ var configCmd = &cobra.Command{
 			}
 			connections.ConfigConnections()
 		}
-		if slices.Contains(specifics, "first-scan") {
-		}
 		viper.WriteConfig()
 		viper.SafeWriteConfig()
 	},
@@ -63,8 +61,8 @@ func init() {
 	configCmd.Flags().StringSliceP(
 		"specific",
 		"s",
-		[]string{"google", "notion", "connections", "first-scan"},
-		"Specific pages to sync (avaliable:google,notion,connections,first-scan,none)",
+		[]string{"google", "notion", "connections"},
+		"Specific pages to sync (avaliable:google,notion,connections,none)",
 	)
 	configCmd.Flags().StringSliceP("remove", "r", []string{"all"}, "Remove old config specific part (avaliable:all,google,notion,connections)")
 	rootCmd.AddCommand(configCmd)
