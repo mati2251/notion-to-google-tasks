@@ -49,6 +49,9 @@ func (NotionService) GetTaskDetails(connectionId string, id string) (*models.Tas
 	dueDate, err := time.Parse(time.RFC3339, dueDateStr)
 	dueDatePtr := &dueDate
 	done := GetStringValueFromProperty(page.Properties[viper.GetString(keys.NOTION_STATUS_KEY)]) == viper.GetString(keys.NOTION_DONE_STATUS_VALUE)
+	if page.Archived {
+		done = true
+	}
 	if err != nil {
 		if dueDateStr == "" {
 			dueDatePtr = nil
