@@ -13,8 +13,8 @@ type ConnectedTask struct {
 }
 
 type Connection struct {
-	NotionDatabasId string
-	TasksListId     string
+	NotionDatabaseId string
+	TasksListId      string
 }
 
 type TaskDetails struct {
@@ -28,4 +28,5 @@ type Service interface {
 	Insert(connectionId string, details *TaskDetails) (string, *time.Time, error)
 	Update(connectionId string, id string, details *TaskDetails) (*time.Time, error)
 	GetTaskDetails(connectionId string, id string) (*TaskDetails, *time.Time, error)
+	GetConnectedTaskById(id string) (*ConnectedTask, error)
 }

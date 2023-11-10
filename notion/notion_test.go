@@ -17,7 +17,7 @@ var connection models.Connection = test.GetTestConnection()
 
 func TestInsert(t *testing.T) {
 	details := test.CreateDetails()
-	id, updated, err := Service.Insert(connection.NotionDatabasId, &details)
+	id, updated, err := Service.Insert(connection.NotionDatabaseId, &details)
 	if err != nil {
 		t.Error(err)
 	}
@@ -50,7 +50,7 @@ func TestInsert(t *testing.T) {
 func TestInsertWithNullDate(t *testing.T) {
 	details := test.CreateDetails()
 	details.DueDate = nil
-	id, updated, err := Service.Insert(connection.NotionDatabasId, &details)
+	id, updated, err := Service.Insert(connection.NotionDatabaseId, &details)
 	if err != nil {
 		t.Error(err)
 	}
@@ -82,11 +82,11 @@ func TestInsertWithNullDate(t *testing.T) {
 
 func TestGetTaskDetails(t *testing.T) {
 	details := test.CreateDetails()
-	pageId, _, err := Service.Insert(connection.NotionDatabasId, &details)
+	pageId, _, err := Service.Insert(connection.NotionDatabaseId, &details)
 	if err != nil {
 		t.Error(err)
 	}
-	taskDetails, _, err := Service.GetTaskDetails(connection.NotionDatabasId, pageId)
+	taskDetails, _, err := Service.GetTaskDetails(connection.NotionDatabaseId, pageId)
 	if err != nil {
 		t.Error(err)
 	}
@@ -113,11 +113,11 @@ func TestGetTaskDetails(t *testing.T) {
 func TestGetTaskDetailsWithNullDate(t *testing.T) {
 	details := test.CreateDetails()
 	details.DueDate = nil
-	pageId, _, err := Service.Insert(connection.NotionDatabasId, &details)
+	pageId, _, err := Service.Insert(connection.NotionDatabaseId, &details)
 	if err != nil {
 		t.Error(err)
 	}
-	taskDetails, _, err := Service.GetTaskDetails(connection.NotionDatabasId, pageId)
+	taskDetails, _, err := Service.GetTaskDetails(connection.NotionDatabaseId, pageId)
 	if err != nil {
 		t.Error(err)
 	}
@@ -156,7 +156,7 @@ func TestCreateNotes(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	details := test.CreateDetails()
-	pageId, _, err := Service.Insert(connection.NotionDatabasId, &details)
+	pageId, _, err := Service.Insert(connection.NotionDatabaseId, &details)
 	if err != nil {
 		t.Error(err)
 	}
@@ -164,11 +164,11 @@ func TestUpdate(t *testing.T) {
 	newDate := details.DueDate.AddDate(0, 0, 1)
 	details.DueDate = &newDate
 	details.Done = true
-	_, err = Service.Update(connection.NotionDatabasId, pageId, &details)
+	_, err = Service.Update(connection.NotionDatabaseId, pageId, &details)
 	if err != nil {
 		t.Error(err)
 	}
-	taskDetails, _, err := Service.GetTaskDetails(connection.NotionDatabasId, pageId)
+	taskDetails, _, err := Service.GetTaskDetails(connection.NotionDatabaseId, pageId)
 	if err != nil {
 		t.Error(err)
 	}

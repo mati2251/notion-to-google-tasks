@@ -46,7 +46,7 @@ func TestInsertAndGet(t *testing.T) {
 		t.Errorf("expected %d got %d", connectedTask.NotionUpdate.Unix(), connectedTaskFromDb.NotionUpdate.Unix())
 	}
 	t.Cleanup(func() {
-		err = RemoveTask(connectedTask.TasksId)
+		err = RemoveTaskByTaskId(connectedTask.TasksId)
 		connectedTaskFromDb, err = GetConnectedTaskByTaskId(connectedTask.TasksId)
 		if err == nil {
 			t.Error("Removing task failed")
@@ -128,11 +128,11 @@ func TestGetConnectedTasks(t *testing.T) {
 		t.Errorf("expected %d got %d", connectedTask2.NotionUpdate.Unix(), connectedTasks[1].NotionUpdate.Unix())
 	}
 	t.Cleanup(func() {
-		err = RemoveTask(connectedTask1.TasksId)
+		err = RemoveTaskByTaskId(connectedTask1.TasksId)
 		if err != nil {
 			t.Error(err)
 		}
-		err = RemoveTask(connectedTask2.TasksId)
+		err = RemoveTaskByTaskId(connectedTask2.TasksId)
 		if err != nil {
 			t.Error(err)
 		}
@@ -173,7 +173,7 @@ func TestUpdateNotionTime(t *testing.T) {
 	}
 
 	t.Cleanup(func() {
-		err = RemoveTask(connectedTask1.TasksId)
+		err = RemoveTaskByTaskId(connectedTask1.TasksId)
 		if err != nil {
 			t.Error(err)
 		}
@@ -213,7 +213,7 @@ func TestUpdateGoogleTime(t *testing.T) {
 	}
 
 	t.Cleanup(func() {
-		err = RemoveTask(connectedTask1.TasksId)
+		err = RemoveTaskByTaskId(connectedTask1.TasksId)
 		if err != nil {
 			t.Error(err)
 		}

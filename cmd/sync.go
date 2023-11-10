@@ -21,6 +21,5 @@ var syncCmd = &cobra.Command{
 }
 
 func init() {
-	syncCmd.Flags().BoolP("force", "f", false, "Force sync even if it is not needed")
 	rootCmd.AddCommand(syncCmd)
 }

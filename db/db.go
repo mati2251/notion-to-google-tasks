@@ -87,8 +87,19 @@ func GetConnectedTaskByNotionId(notionId string) (*models.ConnectedTask, error) 
 	return &connectedTaskFromDb, err
 }
 
-func RemoveTask(taskId string) error {
+func RemoveTaskByTaskId(taskId string) error {
+	if DB == nil {
+		return errors.New("database not opened")
+	}
 	_, err := DB.Exec("DELETE FROM tasks WHERE taskId = ?", taskId)
+	return err
+}
+
+func RemoveTaskByNotionId(notionId string) error {
+	if DB == nil {
+		return errors.New("database not opened")
+	}
+	_, err := DB.Exec("DELETE FROM tasks WHERE notionId = ?", notionId)
 	return err
 }
 

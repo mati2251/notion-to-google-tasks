@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/mati2251/notion-to-google-tasks/config/auth"
+	"github.com/mati2251/notion-to-google-tasks/db"
 	"github.com/mati2251/notion-to-google-tasks/keys"
 	"github.com/mati2251/notion-to-google-tasks/models"
 	"github.com/spf13/viper"
@@ -62,6 +63,9 @@ func (GoogleTaskService) Update(connectionId string, id string, details *models.
 	if err != nil {
 		return nil, errors.Join(err, errors.New("error while updating task"))
 	}
+	if details.Done {
+		db.RemoveTaskByTaskId(id)
+	}
 	updated, err := time.Parse(time.RFC3339, task.Updated)
 	if err != nil {
 		return nil, errors.Join(err, errors.New("error while parsing updated date"))
@@ -100,4 +104,8 @@ func (GoogleTaskService) GetTaskDetails(connectionId string, id string) (*models
 		DueDate: dueDatePointer,
 	}
 	return taskDetails, &updated, nil
+}
+
+func (GoogleTaskService) GetConnectedTaskById(id string) (*models.ConnectedTask, error) {
+	return db.GetConnectedTaskByTaskId(id)
 }

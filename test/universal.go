@@ -11,6 +11,7 @@ import (
 	"github.com/mati2251/notion-to-google-tasks/keys"
 	"github.com/mati2251/notion-to-google-tasks/models"
 	"github.com/spf13/viper"
+	"google.golang.org/api/tasks/v1"
 )
 
 func InitViper() {
@@ -49,8 +50,8 @@ func GetTestConnection() models.Connection {
 		panic(err)
 	}
 	return models.Connection{
-		TasksListId:     taskList.Id,
-		NotionDatabasId: newDb.ID.String(),
+		TasksListId:      taskList.Id,
+		NotionDatabaseId: newDb.ID.String(),
 	}
 }
 
@@ -62,4 +63,37 @@ func CreateDetails() models.TaskDetails {
 		Done:    false,
 		DueDate: &time,
 	}
+}
+
+func CreateTestTasks(conn models.Connection) (string, string) {
+	taskDetails := CreateDetails()
+	taskDetails.DueDate = nil
+	notion, err := auth.NotionClient.Page.Create(context.Background(), &notionapi.PageCreateRequest{
+		Parent: notionapi.Parent{
+			DatabaseID: notionapi.DatabaseID(conn.NotionDatabaseId),
+			Type:       "database_id",
+		},
+		Properties: notionapi.Properties{
+			viper.GetString(keys.NOTION_NAME_KEY): notionapi.TitleProperty{
+				Title: []notionapi.RichText{{
+					Type: "text",
+					Text: &notionapi.Text{
+						Content: taskDetails.Title,
+					},
+				}},
+			},
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+	taskDetails.Title = "Test task 2"
+	taskListId := viper.GetString("google.test_list")
+	task, err := auth.TasksService.Tasks.Insert(taskListId, &tasks.Task{
+		Title: "Test task 2",
+	}).Do()
+	if err != nil {
+		panic(err)
+	}
+	return notion.ID.String(), task.Id
 }

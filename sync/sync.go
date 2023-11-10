@@ -11,11 +11,11 @@ func Sync(connections []models.Connection) error {
 		return err
 	}
 	for _, connection := range connections {
-		ids, err := updates(connection.NotionDatabasId)
+		ids, err := updates(connection.NotionDatabaseId)
 		if err != nil {
 			return err
 		}
-		err = inserts(ids, connection.NotionDatabasId)
+		err = inserts(ids, connection.NotionDatabaseId)
 		if err != nil {
 			return err
 		}

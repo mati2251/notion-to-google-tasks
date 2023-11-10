@@ -30,11 +30,11 @@ func TestNotionInserts(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	taskId, _, err := google.Service.Insert(connection.NotionDatabasId, &taskDetails)
+	taskId, _, err := google.Service.Insert(connection.NotionDatabaseId, &taskDetails)
 	if err != nil {
 		t.Error(err)
 	}
-	err = notionInserts(&ids, connection.NotionDatabasId)
+	err = notionInserts(&ids, connection.NotionDatabaseId)
 	if err != nil {
 		t.Error(err)
 	}
@@ -57,7 +57,7 @@ func TestGoogleInserts(t *testing.T) {
 	}
 	connection := test.GetTestConnection()
 	taskDetails := test.CreateDetails()
-	items, err := auth.NotionClient.Database.Query(context.Background(), notionapi.DatabaseID(connection.NotionDatabasId), &notionapi.DatabaseQueryRequest{})
+	items, err := auth.NotionClient.Database.Query(context.Background(), notionapi.DatabaseID(connection.NotionDatabaseId), &notionapi.DatabaseQueryRequest{})
 	if err != nil {
 		t.Error(err)
 	}
@@ -65,11 +65,11 @@ func TestGoogleInserts(t *testing.T) {
 	for _, task := range items.Results {
 		ids = append(ids, string(task.ID))
 	}
-	notionId, _, err := notion.Service.Insert(connection.NotionDatabasId, &taskDetails)
+	notionId, _, err := notion.Service.Insert(connection.NotionDatabaseId, &taskDetails)
 	if err != nil {
 		t.Error(err)
 	}
-	err = googleInserts(&ids, connection.NotionDatabasId)
+	err = googleInserts(&ids, connection.NotionDatabaseId)
 	if err != nil {
 		t.Error(err)
 	}
@@ -117,7 +117,7 @@ func cleanUp(t *testing.T, connectedTask models.ConnectedTask) {
 	if err != nil {
 		t.Error(err)
 	}
-	err = db.RemoveTask(connectedTask.TasksId)
+	err = db.RemoveTaskByTaskId(connectedTask.TasksId)
 	if err != nil {
 		t.Error(err)
 	}

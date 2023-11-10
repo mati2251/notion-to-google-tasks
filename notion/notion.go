@@ -7,6 +7,7 @@ import (
 
 	"github.com/jomei/notionapi"
 	"github.com/mati2251/notion-to-google-tasks/config/auth"
+	"github.com/mati2251/notion-to-google-tasks/db"
 	"github.com/mati2251/notion-to-google-tasks/keys"
 	"github.com/mati2251/notion-to-google-tasks/models"
 	"github.com/spf13/viper"
@@ -94,6 +95,9 @@ func (NotionService) Update(connectionId string, id string, details *models.Task
 			return nil, err
 		}
 	}
+	if details.Done {
+		db.RemoveTaskByNotionId(id)
+	}
 	page, err = auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(id), &notionapi.PageUpdateRequest{
 		Properties: notionapi.Properties{
 			viper.GetString(keys.NOTION_NAME_KEY):     titleProperty,
@@ -117,4 +121,8 @@ func (NotionService) Update(connectionId string, id string, details *models.Task
 		return &page.LastEditedTime, err
 	}
 	return &page.LastEditedTime, nil
+}
+
+func (NotionService) GetConnectedTaskById(id string) (*models.ConnectedTask, error) {
+	return db.GetConnectedTaskByNotionId(id)
 }
