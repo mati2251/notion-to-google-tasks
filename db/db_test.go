@@ -135,7 +135,87 @@ func TestGetConnectedTasks(t *testing.T) {
 		err = RemoveTask(connectedTask2.TasksId)
 		if err != nil {
 			t.Error(err)
-		}	
+		}
 	})
-	
+
+}
+
+func TestUpdateNotionTime(t *testing.T) {
+	err := OpenFile()
+	if err != nil {
+		t.Error(err)
+	}
+	now := time.Now()
+	connectedTask1 := models.ConnectedTask{
+		TasksId:      "task-123",
+		NotionId:     "notion-123",
+		TaskUpdate:   &now,
+		NotionUpdate: &now,
+		ConnectionId: "test",
+	}
+	err = Insert(connectedTask1)
+	if err != nil {
+		t.Error(err)
+	}
+	newTime := now.Add(time.Hour)
+	err = UpdateNotionTime(connectedTask1.NotionId, &newTime)
+	if err != nil {
+		t.Error(err)
+	}
+
+	connectedTaskFromDb, err := GetConnectedTaskByNotionId(connectedTask1.NotionId)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if connectedTaskFromDb.NotionUpdate.Unix() != now.Add(time.Hour).Unix() {
+		t.Errorf("expected %d got %d", now.Add(time.Hour).Unix(), connectedTaskFromDb.NotionUpdate.Unix())
+	}
+
+	t.Cleanup(func() {
+		err = RemoveTask(connectedTask1.TasksId)
+		if err != nil {
+			t.Error(err)
+		}
+	})
+}
+
+func TestUpdateGoogleTime(t *testing.T) {
+	err := OpenFile()
+	if err != nil {
+		t.Error(err)
+	}
+	now := time.Now()
+	connectedTask1 := models.ConnectedTask{
+		TasksId:      "task-123",
+		NotionId:     "notion-123",
+		TaskUpdate:   &now,
+		NotionUpdate: &now,
+		ConnectionId: "test",
+	}
+	err = Insert(connectedTask1)
+	if err != nil {
+		t.Error(err)
+	}
+	newTime := now.Add(time.Hour)
+	err = UpdateGoogleTime(connectedTask1.TasksId, &newTime)
+	if err != nil {
+		t.Error(err)
+	}
+
+	connectedTaskFromDb, err := GetConnectedTaskByTaskId(connectedTask1.TasksId)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if connectedTaskFromDb.TaskUpdate.Unix() != newTime.Unix() {
+		t.Errorf("expected %d got %d", newTime.Unix(), connectedTaskFromDb.NotionUpdate.Unix())
+	}
+
+	t.Cleanup(func() {
+		err = RemoveTask(connectedTask1.TasksId)
+		if err != nil {
+			t.Error(err)
+		}
+	})
 }

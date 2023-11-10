@@ -130,6 +130,9 @@ func GetStringValueFromProperty(property notionapi.Property) string {
 
 func UpdateValueFromProp(property notionapi.Property, newValue string) (notionapi.Property, error) {
 	var obj notionapi.Property = property
+	if property == nil {
+		return nil, errors.New("property is nil")
+	}
 	switch property.GetType() {
 	case notionapi.PropertyTypeRichText:
 		obj.(*notionapi.RichTextProperty).RichText = []notionapi.RichText{
@@ -171,7 +174,10 @@ func UpdateValueFromProp(property notionapi.Property, newValue string) (notionap
 		if err != nil {
 			return nil, errors.Join(err, errors.New("error parsing newValue to time"))
 		}
-		obj.(*notionapi.DateProperty).Date.Start = &notionDate
+		dateObject := notionapi.DateObject{
+			Start: &notionDate,
+		}
+		obj.(*notionapi.DateProperty).Date = &dateObject
 	case notionapi.PropertyTypeCheckbox:
 		checked, err := strconv.ParseBool(newValue)
 		if err != nil {

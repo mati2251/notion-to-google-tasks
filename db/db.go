@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"os"
+	"time"
 
 	"github.com/mati2251/notion-to-google-tasks/keys"
 	"github.com/mati2251/notion-to-google-tasks/models"
@@ -113,4 +114,14 @@ func GetConnectedTasks(connectionId string) ([]models.ConnectedTask, error) {
 		connectedTasks = append(connectedTasks, connectedTask)
 	}
 	return connectedTasks, nil
+}
+
+func UpdateNotionTime(notionId string, updated *time.Time) error {
+	_, err := DB.Exec("UPDATE tasks SET notionUpdate = ? WHERE notionId = ?", updated, notionId)
+	return err
+}
+
+func UpdateGoogleTime(taskId string, updated *time.Time) error {
+	_, err := DB.Exec("UPDATE tasks SET taskUpdate = ? WHERE taskId = ?", updated, taskId)
+	return err
 }

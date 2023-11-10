@@ -84,9 +84,12 @@ func (NotionService) Update(connectionId string, id string, details *models.Task
 	if err != nil {
 		return nil, err
 	}
-	dateProperty, err := UpdateValueFromProp(page.Properties[viper.GetString(keys.NOTION_DEADLINE_KEY)], details.DueDate.Format(time.RFC3339))
-	if err != nil {
-		return nil, err
+	dateProperty := page.Properties[viper.GetString(keys.NOTION_DEADLINE_KEY)]
+	if details.DueDate != nil {
+		dateProperty, err = UpdateValueFromProp(dateProperty, details.DueDate.Format(time.RFC3339))
+		if err != nil {
+			return nil, err
+		}
 	}
 	page, err = auth.NotionClient.Page.Update(context.Background(), notionapi.PageID(id), &notionapi.PageUpdateRequest{
 		Properties: notionapi.Properties{
